@@ -50,8 +50,8 @@ def read_fastq(inFile):
     return record_list
 
 def write_SA(genome_name, fa_rec, SA):
-    os.makedirs('{}/{}/'.format(genome_name, fa_rec))
-    with open('{}/{}/SA.txt'.format(genome_name, fa_rec), 'w') as f:
+    os.makedirs('../{}/{}/'.format(genome_name, fa_rec))
+    with open('../{}/{}/SA.txt'.format(genome_name, fa_rec), 'w') as f:
         print(SA, file=f)
         
 def open_SA(path_to_preprocessed_dir, fa_rec):
@@ -101,7 +101,7 @@ def main():
         for fa_rec in fasta_recs:
             ref = fa_rec[1]
             SA = SuffixArray(ref)
-            try: genome_name = args.genome.name.split('/')[1]
+            try: genome_name = args.genome.name.split('/')[-1]
             except: genome_name = args.genome.name
             write_SA('{}'.format(genome_name),'Preprocessed_{}'.format(fa_rec[0]), SA)
     
