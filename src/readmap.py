@@ -8,8 +8,10 @@ import os
 #########################################
 # Functions
 
-from Readmapper_Cython_Convert import SuffixArray
-from Readmapper_Cython_Convert import approx_search
+from All_python_functions import SuffixArray
+from All_python_functions import approx_search
+# from Readmapper_Cython_Convert import SuffixArray
+# from Readmapper_Cython_Convert import approx_search
 from cigar import edits_to_cigar
 from align import get_edits
 
