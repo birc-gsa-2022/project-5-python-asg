@@ -50,8 +50,8 @@ def read_fastq(inFile):
     return record_list
 
 def write_SA(genome_name, fa_rec, SA):
-    os.makedirs('../{}/{}/'.format(genome_name, fa_rec))
-    with open('../{}/{}/SA.txt'.format(genome_name, fa_rec), 'w') as f:
+    os.makedirs('{}/{}/'.format(genome_name, fa_rec))
+    with open('{}/{}/SA.txt'.format(genome_name, fa_rec), 'w') as f:
         print(SA, file=f)
         
 def open_SA(path_to_preprocessed_dir, fa_rec):
