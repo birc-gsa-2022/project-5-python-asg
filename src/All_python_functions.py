@@ -69,28 +69,45 @@ def binary_search(SA, string, pattern):
 
 def approx_search(string, pattern, SA, max_edit_dist):
     n_segments = max_edit_dist+1
-    segment_size = len(pattern) // n_segments + (len(pattern) % n_segments > 0)
-    approx_matches = []
-    for j in range(n_segments):
-        segment_start = j*segment_size
+    segment_size = int(round(len(pattern)/n_segments))
+    approx_matches = set()
+    exp_start = set()
+    
+    for k in range(n_segments):
+        segment_start = k*segment_size
         segment_end = segment_start + segment_size
         if segment_end > len(pattern): segment_end = len(pattern)
         matches = binary_search(SA, string, pattern[segment_start:segment_end])
         if matches != None:
-            for match in matches:
-                if match >= segment_start and len(string) >= (match-segment_start+len(pattern)):
-                    mm = 0 
-                    for i in range(0,segment_start):
-                        if pattern[i] != string[match-segment_start+i]:
-                            mm+=1
-                            if mm > max_edit_dist: break
-                    for i in range(segment_end,len(pattern)):
-                        if pattern[i] != string[match-segment_start+i]:
-                            mm+=1
-                            if mm > max_edit_dist:  break
-                    if mm <= max_edit_dist:
-                        approx_pos = match-segment_start
-                        approx_matches.append(approx_pos) if approx_pos not in approx_matches else approx_matches
+            for m in matches:
+                start = m-segment_start
+                if start >= 0 and start <= len(string):
+                    exp_start.add((start,m))
+    
+    if exp_start != None:
+        for s in exp_start:
+            try: sub_string = string[s[0]:s[0]+len(pattern)] 
+            except: continue
+            stack = [(0,0,0)]  # [i, j, edits, edit_score].
+            while len(stack) > 0:
+                sub = stack.pop()
+                j = sub[1]
+                mm = sub[2]
+                for i in range(sub[0], len(sub_string)):
+                    if i == len(pattern)-1:
+                        approx_matches.add(s[0])
+                    if mm+1 <= max_edit_dist and pattern[i] != sub_string[j]:
+                        stack.append( (i, j, sub[2]+1) )  # m=mismatch.
+                        stack.append( (i+1, j, sub[2]+1) )  # D=deletion.
+                        stack.append( (i, j+1, sub[2]+1) )  # I=insertion.
+                        continue
+                    j+=1                    
+    
     return approx_matches
 
 ################################################################
+# string =  'mississippi'
+# pattern = 'mssmsi'
+# SA = SuffixArray(string)
+# print(approx_search(string, pattern, SA, 3))
+

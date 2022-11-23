@@ -96,7 +96,7 @@ def main():
     args = argparser.parse_args()
 
     if args.p:
-        print(f"Preprocess {args.genome}")
+        #print(f"Preprocess {args.genome}")
         fasta_recs = read_fasta(args.genome)
         for fa_rec in fasta_recs:
             ref = fa_rec[1]
@@ -106,7 +106,7 @@ def main():
             write_SA('{}'.format(genome_name),'Preprocessed_{}'.format(fa_rec[0]), SA)
     
     elif args.u:
-        print(f"Use preprocessed genome {args.u}")
+        #print(f"Use preprocessed genome {args.u}")
         fasta_recs = read_fasta(args.genome)
         fastq_recs = read_fastq(args.reads)
         for fa_rec in fasta_recs:
