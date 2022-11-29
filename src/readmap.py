@@ -8,8 +8,8 @@ import os
 #########################################
 # Functions
 
-from All_python_functions import SuffixArray
-from All_python_functions import approx_search
+from Approx_Positions import SuffixArray
+from Approx_Positions import approx_positions
 # from Readmapper_Cython_Convert import SuffixArray
 # from Readmapper_Cython_Convert import approx_search
 from cigar import edits_to_cigar
@@ -107,7 +107,7 @@ def main():
             SA = open_SA(args.u, fa_rec[0])
             for fq_rec in fastq_recs:
                 read = fq_rec[1]
-                matches = approx_search(ref, read, SA, args.d)
+                matches = approx_positions(ref, read, SA, args.d)
                 for match in matches:
                     read_name = fq_rec[0]
                     read_seq = fq_rec[1]
@@ -129,7 +129,7 @@ def main():
                 SA = SuffixArray(ref)
                 for fq_rec in fastq_recs:
                     read = fq_rec[1]
-                    matches = approx_search(ref, read, SA, args.d)
+                    matches = approx_positions(ref, read, SA, args.d)
                     for match in matches:
                         read_name = fq_rec[0]
                         read_seq = fq_rec[1]
