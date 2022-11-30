@@ -133,7 +133,7 @@ def main():
                     for match in matches:
                         read_name = fq_rec[0]
                         read_seq = fq_rec[1]
-                        edits = get_edits(match[1], match[2])
+                        edits = get_edits(match[2], match[1])
                         cigar = edits_to_cigar(edits[2])
                         output = [read_name,fa_rec[0],str(match[0]+1),cigar,read_seq]
                         print('\t'.join(output))

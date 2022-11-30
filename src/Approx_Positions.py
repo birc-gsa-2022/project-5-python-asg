@@ -1,4 +1,5 @@
 import numpy as np
+from collections import deque
 
 def SuffixArray(string):
     if string == '' or string == None:
@@ -116,7 +117,7 @@ def local_alignment(seq1, seq2):
     # print(matrix)
     return (seq1_aligned, seq2_aligned, edit_distance, matrix)
 
-    
+
 def approx_positions(string, pattern, SA, d):
     n_segments = d+1
     segment_size = int(round(len(pattern)/n_segments))
@@ -157,62 +158,71 @@ def approx_positions(string, pattern, SA, d):
     # Get all matrices with best-fit <= d+chopped_pattern_ends:
     for tup in possible_intervals:
         seq = string[tup[0]:tup[1]]
-        if len(seq) >= len(pattern) -d:
-            # print('sequences:', seq, pattern, tup[0])
-            alignment = local_alignment(seq, pattern)
-            ends_dist = 0
+        if 0 <= abs(len(seq) - len(pattern)) <= (2*d) and len(seq) > 0 and len(pattern) > 0:
+            alignment = local_alignment(pattern, seq)
+            s_dist = 0
             j = 0
-            while alignment[1][j] == '-' :
-                ends_dist+=1
+            while alignment[0][j] == '-' :
+                s_dist+=1
                 j+=1
+            e_dist = 0
             j = 0
-            while alignment[1][::-1][j] == '-':
-                ends_dist+=1
+            while alignment[0][::-1][j] == '-':
+                e_dist+=1
                 j+=1
+            ends_dist = (s_dist+e_dist)
 
             # Report all paths of matrix within d edits:
             if alignment[2] - ends_dist <= d:
-                # print('Final matrix: \n', alignment[3], tup[0])
-                # print(ends_dist)
-        
+                # print(pattern, seq)
+                # print(alignment[3], tup[0])
+
                 matrix = alignment[3]
-                seq1, seq2 = list(seq), list(pattern)
+                seq1, seq2 = list(pattern), list(seq)
                 row, col = len(seq1), len(seq2)
-                stack = [([], [], row, col)]
+                stack = [([], [], row, col)] 
                 while len(stack) > 0:
                     cur = stack.pop()
                     row, col = cur[2], cur[3]
+                    
                     if row == 0 and col == 0:
                         approx_pos.add((tup[0], ''.join(cur[0])[::-1], ''.join(cur[1])[::-1]))
+                    
                     else: 
                         # cost = 0 if seq1[row - 1] == seq2[col - 1] else 1
                         vertical = matrix[row-1, col]
                         diagonal = matrix[row-1, col-1]
                         horizontal = matrix[row, col-1]
+                        
                         if matrix[row,col] == (diagonal+0) and (diagonal+0) <= (d+ends_dist):
                             path_tup = ( cur[0]+[seq1[row-1]], cur[1]+[seq2[col-1]], row-1, col-1 )
                             stack.append(path_tup)
                         if matrix[row,col] == (diagonal+1) and (diagonal+1) <= (d+ends_dist):
                             path_tup = ( cur[0]+[seq1[row-1]], cur[1]+[seq2[col-1]], row-1, col-1 )
                             stack.append(path_tup)
-                        if matrix[row,col] == (vertical+1) and (vertical+1) <= (d+ends_dist):
+                        
+                        if matrix[row,col] <= (vertical+1) and (vertical+1) <= (d+ends_dist):
                             path_tup = ( cur[0]+[seq1[row - 1]], cur[1]+["-"], row-1, col )
                             stack.append(path_tup)
-                        if matrix[row,col] == (horizontal+1) and (horizontal+1) <= (d+ends_dist):
+                        
+                        if matrix[row,col] <= (horizontal+1) and (horizontal+1) <= (d+ends_dist):
                             path_tup = ( cur[0]+["-"], cur[1]+[seq2[col-1]], row, col-1 )
                             stack.append(path_tup)
         
         for alignment in approx_pos:
+            # print(alignment)
+            
             start_gaps = 0
             j = 0
-            while alignment[2][j] == '-':
+            while alignment[1][j] == '-':
                 start_gaps+=1
                 j+=1
             end_gaps = 0
             j = 0
-            while alignment[2][::-1][j] == '-':
+            while alignment[1][::-1][j] == '-':
                 end_gaps+=1
                 j+=1
+            
             al1 = alignment[1][0+start_gaps:len(alignment[1])-end_gaps]
             al2 = alignment[2][0+start_gaps:len(alignment[2])-end_gaps]
             pos = alignment[0]+(start_gaps)
@@ -228,18 +238,18 @@ def approx_positions(string, pattern, SA, d):
 
 
 
-
-
-
-
     
 # if in ['-', pattern[-1]] (test if new match right)
 ###########################################################
 # Usage:
 # string =  'cacgttcattagatagatcccgagagtgtacgccacaggggtcgagacaacacctaccgcatactcgctccaccttttttttgtaggagcatgaaaaggaaacatgagtcggttgagtactggaccgcacacaaaccattatcacgctattaatcctagtagcaggacttcgacgccatatccgagtttacggccgctcgggaaacgtgaacatttcgtggcttatagacatttgaagccacccctgatgatgtgtacccctaaaatcgtcctcgaacggcagatattactccaggtccttcccactcttttgcaaagggcgagagttcgaacccaacgtggaacggtataaagccacgaatggtggcgagctttcgcctttgagagtcggatacgcggactctaaagcataggcgcagcgtccattctagccttgcaaggtaactccggtcccgatgcctaatgtacggaggtagataagcatggcatttttgaccaacttacgtggagagtgactagatagtgatcccacaagtgataacgatccgctctgtccagggttccaagtcataagtcttccaatattactaggccgcgcggtcttactgtttcctaagaacgtgagacgccatccaactagacccttgtgaaagtgacaacgtgtcaccagcataagctttggagtattagttatttgtatcgttagattcagggaccattttagatacctactttgagaaaggggcccggctcgttgtagtaacttgaaagcgcttacgtgaataggacgttggatctcccatttcgtaggtaaataaatgttctccacatggccacgtgcgaggggtttcaactataatgcgcttcttatctttaaccggcgggtccgttacggggacgcgaacatagttgtgcgctagtgggcatgtatacagtacaggaactcgactcacactttttcaaaacaggaatgactacactccttgttttcgtggctggg'
-# pattern = 'gatcccgagagtgtacgccacaggggtcgagacaacacctaccgcatactcgctccaccttttttgtaggagcatgaaaaaaacatgagtcggttgagtactggaccgcacacaaaccatt'
-# SA = SuffixArray(string)
-# print(approx_positions(string, pattern, SA, 3))
+string =  'gtcaacaaccacaggaggaagctaggccttggtccgtgaaggacgc-gtccaacgatatgacaacaggcaaagggaaaaattgacaggactctccgactat'
+pattern = '                                         g-cgcggtcca'
+
+string = 'gtcaacaaccacaggaggaagctaggccttggtccgtgaaggacgcgtccaacgatatgacaacaggcaaagggaaaaattgacaggactctccgactat'
+pattern = 'gcgcggtcca'
+SA = SuffixArray(string)
+print(approx_positions(string, pattern, SA, 2))
 
 # caaaagtaga
 # caaaagt-ga
@@ -257,41 +267,198 @@ def approx_positions(string, pattern, SA, d):
 
 
 
+ # stack = [(tup[0], 0, 0, 0, '', '')]  # start_pos, mismatches, i, j, pattern_align, string_align.
+ #                sub_string = seq
+ #                min_len = min(len(pattern), len(sub_string))
+ #                max_len = max(len(pattern), len(sub_string))
+
+ #                while len(stack) > 0:
+ #                    cur = stack.pop()
+ #                    mm = cur[1]
+ #                    ii = cur[2]
+ #                    jj = cur[3]
 
 
-# for inter in possible_intervals:
-#         stack = [(inter[0], 0, 0, '', '')]  # start_pos, mismatches, current_pos, pattern_align, string_align.
-#         sub_string = string[inter[0]:inter[1]]
-#         while len(stack) > 0:
-#             cur = stack.pop()
-#             idx = cur[2]
+ #                    if ii == min_len or jj == min_len:
+ #                        if len(cur[4]) > len(cur[5]):
+ #                            cur[5]+'-'*(len(cur[4])-len(cur[5]))
+ #                        if len(cur[4]) < len(cur[5]):
+ #                            cur[4]+'-'*(len(cur[5])-len(cur[4]))
+ #                        approx_pos.add((cur[0], cur[4], cur[5]))
+
+ #                    elif ii < min_len and jj < min_len:
+                        
+ #                        # Match:
+ #                        if pattern[ii] == sub_string[jj]:
+                            
+ #                            tup = (cur[0], mm, ii+1, jj+1, cur[4]+pattern[ii], cur[5]+sub_string[jj])
+ #                            if mm <= 2*d: stack.append(tup)
+
+ #                            tup = (cur[0], mm, ii+1, jj, cur[4]+pattern[ii], cur[5]+sub_string[jj])
+ #                            if mm <= 2*d: stack.append(tup)
+
+ #                            tup = (cur[0], mm, ii, jj+1, cur[4]+pattern[ii], cur[5]+sub_string[jj])
+ #                            if mm <= 2*d: stack.append(tup)
+
+ #                        # Mismatch:
+ #                        if pattern[ii] != sub_string[jj]:
+
+ #                            tup = (cur[0], mm+1, ii+1, jj+1, cur[4]+pattern[ii], cur[5]+sub_string[jj])
+ #                            if mm <= 2*d: stack.append(tup)
+
+ #                            tup = (cur[0], mm+1, ii+1, jj, cur[4]+'-', cur[5]+sub_string[jj])
+ #                            if mm <= 2*d: stack.append(tup)
+
+ #                            tup = (cur[0], mm+1, ii, jj+1, cur[4]+pattern[ii], cur[5]+'-')
+ #                            if mm <= 2*d: stack.append(tup)
+    
+ #    for alignment in approx_pos:
+ #        print(alignment)
+ #        print(pattern, sub_string)
+        
+ #        start_gaps = 0
+ #        j = 0
+ #        while alignment[1][j] == '-':
+ #            start_gaps+=1
+ #            j+=1
+ #        end_gaps = 0
+ #        j = 0
+ #        while alignment[1][::-1][j] == '-':
+ #            end_gaps+=1
+ #            j+=1
+ #        al1 = alignment[1][0+start_gaps:len(alignment[1])-end_gaps]
+ #        al2 = alignment[2][0+start_gaps:len(alignment[2])-end_gaps]
+ #        pos = alignment[0]+(start_gaps)
+        
+ #        mm = 0
+ #        for i in range(len(al1)):
+ #            if al1[i] != al2[i]:
+ #                mm+=1
+ #        if mm <= d:
+ #            approx_trimmed.add((pos,al1,al2))
+                
+ #    return ''
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Report all paths of matrix within d edits:
+    #         if alignment[2] - ends_dist <= d:
+    #             print(alignment[3], tup[0])
+
+
+    #             matrix = alignment[3]
+    #             seq1, seq2 = list(pattern), list(seq)
+    #             row, col = len(seq1), len(seq2)
+    #             stack = [([], [], row, col)]
+    #             while len(stack) > 0:
+    #                 cur = stack.pop()
+    #                 row, col = cur[2], cur[3]
+    #                 if row == 0 or col == 0:
+    #                     approx_pos.add((tup[0], ''.join(cur[0])[::-1], ''.join(cur[1])[::-1]))
+    #                 else: 
+    #                     # cost = 0 if seq1[row - 1] == seq2[col - 1] else 1
+    #                     vertical = matrix[row-1, col]
+    #                     diagonal = matrix[row-1, col-1]
+    #                     horizontal = matrix[row, col-1]
+    #                     if matrix[row,col] == (diagonal+0) and (diagonal+0) <= (d+ends_dist):
+    #                         path_tup = ( cur[0]+[seq1[row-1]], cur[1]+[seq2[col-1]], row-1, col-1 )
+    #                         stack.append(path_tup)
+    #                     if matrix[row,col] == (diagonal+1) and (diagonal+1) <= (d+ends_dist):
+    #                         path_tup = ( cur[0]+[seq1[row-1]], cur[1]+[seq2[col-1]], row-1, col-1 )
+    #                         stack.append(path_tup)
+    #                     if matrix[row,col] == (vertical+1) and (vertical+1) <= (d+ends_dist):
+    #                         path_tup = ( cur[0]+[seq1[row - 1]], cur[1]+["-"], row-1, col )
+    #                         stack.append(path_tup)
+    #                     if matrix[row,col] == (horizontal+1) and (horizontal+1) <= (d+ends_dist):
+    #                         path_tup = ( cur[0]+["-"], cur[1]+[seq2[col-1]], row, col-1 )
+    #                         stack.append(path_tup)
+        
+    #     for alignment in approx_pos:
+    #         start_gaps = 0
+    #         j = 0
+    #         while alignment[2][j] == '-':
+    #             start_gaps+=1
+    #             j+=1
+    #         end_gaps = 0
+    #         j = 0
+    #         while alignment[2][::-1][j] == '-':
+    #             end_gaps+=1
+    #             j+=1
+    #         al1 = alignment[1][0+start_gaps:len(alignment[1])-end_gaps]
+    #         al2 = alignment[2][0+start_gaps:len(alignment[2])-end_gaps]
+    #         pos = alignment[0]+(start_gaps)
             
-#             if idx <= len(pattern)-1 and idx <= len(sub_string)-1:
-#                 # print(idx, len(pattern), len(sub_string))
-#                     if pattern[idx] == sub_string[idx]:
-#                         tup = (cur[0], cur[1], cur[2]+1, cur[3]+pattern[idx], cur[4]+sub_string[idx])
-#                         if tup[1] <= d: stack.append(tup) 
+    #         mm = 0
+    #         for i in range(len(al1)):
+    #             if al1[i] != al2[i]:
+    #                 mm+=1
+    #         if mm <= d:
+    #             approx_trimmed.add((pos,al1,al2))
+                    
+    # return list(approx_trimmed)
+
+
+
+
+
+
+
+
+
+
+
+# print(alignment, tup[0])
+#                 stack = [(tup[0], 0, 0, '', '')]  # start_pos, mismatches, current_pos, pattern_align, string_align.
+#                 sub_string = seq
+#                 max_len = max(len(pattern), len(sub_string))
+
+#                 while len(stack) > 0:
+#                     cur = stack.pop()
+#                     idx = cur[2]
+#                     print(stack)
+
+#                     if idx == max_len:
+#                         tup = (cur[0], cur[3], cur[4])
+#                         approx_pos.append(tup)
+#                         print(stack)
+
+#                     elif idx <= len(pattern)-1 and idx <= len(sub_string)-1:
+#                         if pattern[idx] == sub_string[idx]:
+#                             tup = (cur[0], cur[1], cur[2]+1, cur[3]+pattern[idx], cur[4]+sub_string[idx])
+#                             if tup[1] <= 2*d: stack.append(tup) 
+#                             tup = (cur[0], cur[1]+1, cur[2]+1, cur[3]+pattern[idx], cur[4]+'-')
+#                             if tup[1] <= 2*d: stack.append(tup)
+#                             tup = (cur[0], cur[1]+1, cur[2]+1, cur[3]+'-', cur[4]+sub_string[idx])
+#                             if tup[1] <= 2*d: stack.append(tup)
+
+#                         elif pattern[idx] != sub_string[idx]:
+#                             tup = (cur[0], cur[1]+1, cur[2]+1, cur[3]+pattern[idx], cur[4]+sub_string[idx])
+#                             if tup[1] <= 2*d: stack.append(tup) 
+#                             tup = (cur[0], cur[1]+1, cur[2]+1, cur[3]+pattern[idx], cur[4]+'-')
+#                             if tup[1] <= 2*d: stack.append(tup)
+#                             tup = (cur[0], cur[1]+1, cur[2]+1, cur[3]+'-', cur[4]+sub_string[idx])
+#                             if tup[1] <= 2*d: stack.append(tup)
+
+#                     elif idx <= len(pattern)-1 and idx > len(sub_string)-1:
 #                         tup = (cur[0], cur[1]+1, cur[2]+1, cur[3]+pattern[idx], cur[4]+'-')
-#                         if tup[1] <= d: stack.append(tup)
+#                         if tup[1] <= 2*d: stack.append(tup)
+
+#                     elif idx > len(pattern)-1 and idx <= len(sub_string)-1:
 #                         tup = (cur[0], cur[1]+1, cur[2]+1, cur[3]+'-', cur[4]+sub_string[idx])
-#                         if tup[1] <= d: stack.append(tup)
+#                         if tup[1] <= 2*d: stack.append(tup)
 
-#                     if pattern[idx] != sub_string[idx]:
-#                         tup = (cur[0], cur[1]+1, cur[2]+1, cur[3]+pattern[idx], cur[4]+'-')
-#                         if tup[1] <= d: stack.append(tup)
-#                         tup = (cur[0], cur[1]+1, cur[2]+1, cur[3]+'-', cur[4]+sub_string[idx])
-#                         if tup[1] <= d: stack.append(tup)
-
-#             if idx > len(pattern)-1 and idx <= len(sub_string)-1:
-#                 tup = (cur[0], cur[1]+1, cur[2]+1, cur[3]+'-', cur[4]+sub_string[idx])
-#                 if tup[1] <= d: 
-#                     stack.append(tup)
-
-#             if idx <= len(pattern)-1 and idx > len(sub_string)-1:
-#                 tup = (cur[0], cur[1]+1, cur[2]+1, cur[3]+pattern[idx], cur[4]+'-')
-#                 if tup[1] <= d: 
-#                     stack.append(tup)
-
-#             if idx == len(pattern)-1:
-#                 align_tup = (cur[0], cur[3], cur[4])
-#                 approx_pos.add(align_tup)
+#                     else:
+#                         print(idx, sub_string, pattern)
