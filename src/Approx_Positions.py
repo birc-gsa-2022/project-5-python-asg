@@ -173,19 +173,21 @@ def approx_positions(string, pattern, SA, d):
             ends_dist = (s_dist+e_dist)
 
             # Report all paths of matrix within d edits:
-            if alignment[2] - ends_dist <= d:
+            d_max = (d+ends_dist)
+            if alignment[2] <= d_max:
                 # print(pattern, seq)
                 # print(alignment[3], tup[0])
 
                 matrix = alignment[3]
                 seq1, seq2 = list(pattern), list(seq)
                 row, col = len(seq1), len(seq2)
-                stack = [([], [], row, col)] 
-                # print(seq1,seq2)
+                stack = set()
+                run = ('', '', row, col)
+                stack.add(run)
                 while len(stack) > 0:
                     cur = stack.pop()
                     row, col = cur[2], cur[3]
-                
+
                     if row == 0 and col == 0:
                         approx_pos.add((tup[0], ''.join(cur[0])[::-1], ''.join(cur[1])[::-1]))
                     
@@ -194,27 +196,27 @@ def approx_positions(string, pattern, SA, d):
                         diagonal = matrix[row-1, col-1]
                         horizontal = matrix[row, col-1]
                         
-                        if matrix[row,col] == (diagonal+0) and (diagonal+0) <= (d+ends_dist):
-                            path_tup = ( cur[0]+[seq1[row-1]], cur[1]+[seq2[col-1]], row-1, col-1 )
-                            stack.append(path_tup)
-                        if matrix[row,col] == (diagonal+1) and (diagonal+1) <= (d+ends_dist):
-                            path_tup = ( cur[0]+[seq1[row-1]], cur[1]+[seq2[col-1]], row-1, col-1 )
-                            stack.append(path_tup)
+                        if matrix[row,col] == (diagonal) and (diagonal) <= d_max:
+                            path_tup = ( cur[0]+seq1[row-1], cur[1]+seq2[col-1], row-1, col-1 )
+                            stack.add(path_tup)
+                        if matrix[row,col] == (diagonal+1) and (diagonal+1) <= d_max and row>0 and col>0:
+                            path_tup = ( cur[0]+seq1[row-1], cur[1]+seq2[col-1], row-1, col-1 )
+                            stack.add((path_tup))
                         
-                        if matrix[row,col] == (vertical) and (vertical) <= (d+ends_dist):
-                            path_tup = ( cur[0]+[seq1[row - 1]], cur[1]+["-"], row-1, col )
-                            stack.append(path_tup)
-                        if matrix[row,col] == (vertical+1) and (vertical+1) <= (d+ends_dist):
-                            path_tup = ( cur[0]+[seq1[row - 1]], cur[1]+["-"], row-1, col )
-                            stack.append(path_tup)
+                        if matrix[row,col] == (vertical) and (vertical) <= d_max:
+                            path_tup = ( cur[0]+seq1[row - 1], cur[1]+"-", row-1, col )
+                            stack.add(path_tup)
+                        if matrix[row,col] == (vertical+1) and (vertical+1) <= d_max and row>0:
+                            path_tup = ( cur[0]+seq1[row - 1], cur[1]+"-", row-1, col )
+                            stack.add(path_tup)
                         
-                        if matrix[row,col] == (horizontal) and (horizontal) <= (d+ends_dist):
-                            path_tup = ( cur[0]+["-"], cur[1]+[seq2[col-1]], row, col-1 )
-                            stack.append(path_tup)
-                        if matrix[row,col] == (horizontal+1) and (horizontal+1) <= (d+ends_dist):
-                            path_tup = ( cur[0]+["-"], cur[1]+[seq2[col-1]], row, col-1 )
-                            stack.append(path_tup)
-
+                        if matrix[row,col] == (horizontal) and (horizontal) <= d_max:
+                            path_tup = ( cur[0]+"-", cur[1]+seq2[col-1], row, col-1 )
+                            stack.add(path_tup)
+                        if matrix[row,col] == (horizontal+1) and (horizontal+1) <= d_max and col>0:
+                            path_tup = ( cur[0]+"-", cur[1]+seq2[col-1], row, col-1 )
+                            stack.add(path_tup)
+        # print(approx_pos)
         for alignment in approx_pos:
             # print(alignment)
             
