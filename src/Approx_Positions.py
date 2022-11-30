@@ -181,15 +181,15 @@ def approx_positions(string, pattern, SA, d):
                 seq1, seq2 = list(pattern), list(seq)
                 row, col = len(seq1), len(seq2)
                 stack = [([], [], row, col)] 
+                # print(seq1,seq2)
                 while len(stack) > 0:
                     cur = stack.pop()
                     row, col = cur[2], cur[3]
-                    
+                
                     if row == 0 and col == 0:
                         approx_pos.add((tup[0], ''.join(cur[0])[::-1], ''.join(cur[1])[::-1]))
                     
                     else: 
-                        # cost = 0 if seq1[row - 1] == seq2[col - 1] else 1
                         vertical = matrix[row-1, col]
                         diagonal = matrix[row-1, col-1]
                         horizontal = matrix[row, col-1]
@@ -201,14 +201,20 @@ def approx_positions(string, pattern, SA, d):
                             path_tup = ( cur[0]+[seq1[row-1]], cur[1]+[seq2[col-1]], row-1, col-1 )
                             stack.append(path_tup)
                         
-                        if matrix[row,col] <= (vertical+1) and (vertical+1) <= (d+ends_dist):
+                        if matrix[row,col] == (vertical) and (vertical) <= (d+ends_dist):
+                            path_tup = ( cur[0]+[seq1[row - 1]], cur[1]+["-"], row-1, col )
+                            stack.append(path_tup)
+                        if matrix[row,col] == (vertical+1) and (vertical+1) <= (d+ends_dist):
                             path_tup = ( cur[0]+[seq1[row - 1]], cur[1]+["-"], row-1, col )
                             stack.append(path_tup)
                         
-                        if matrix[row,col] <= (horizontal+1) and (horizontal+1) <= (d+ends_dist):
+                        if matrix[row,col] == (horizontal) and (horizontal) <= (d+ends_dist):
                             path_tup = ( cur[0]+["-"], cur[1]+[seq2[col-1]], row, col-1 )
                             stack.append(path_tup)
-        
+                        if matrix[row,col] == (horizontal+1) and (horizontal+1) <= (d+ends_dist):
+                            path_tup = ( cur[0]+["-"], cur[1]+[seq2[col-1]], row, col-1 )
+                            stack.append(path_tup)
+
         for alignment in approx_pos:
             # print(alignment)
             
@@ -226,6 +232,7 @@ def approx_positions(string, pattern, SA, d):
             al1 = alignment[1][0+start_gaps:len(alignment[1])-end_gaps]
             al2 = alignment[2][0+start_gaps:len(alignment[2])-end_gaps]
             pos = alignment[0]+(start_gaps)
+            # print(al1,al2)
             
             mm = 0
             for i in range(len(al1)):
@@ -243,17 +250,16 @@ def approx_positions(string, pattern, SA, d):
 ###########################################################
 # Usage:
 # string =  'cacgttcattagatagatcccgagagtgtacgccacaggggtcgagacaacacctaccgcatactcgctccaccttttttttgtaggagcatgaaaaggaaacatgagtcggttgagtactggaccgcacacaaaccattatcacgctattaatcctagtagcaggacttcgacgccatatccgagtttacggccgctcgggaaacgtgaacatttcgtggcttatagacatttgaagccacccctgatgatgtgtacccctaaaatcgtcctcgaacggcagatattactccaggtccttcccactcttttgcaaagggcgagagttcgaacccaacgtggaacggtataaagccacgaatggtggcgagctttcgcctttgagagtcggatacgcggactctaaagcataggcgcagcgtccattctagccttgcaaggtaactccggtcccgatgcctaatgtacggaggtagataagcatggcatttttgaccaacttacgtggagagtgactagatagtgatcccacaagtgataacgatccgctctgtccagggttccaagtcataagtcttccaatattactaggccgcgcggtcttactgtttcctaagaacgtgagacgccatccaactagacccttgtgaaagtgacaacgtgtcaccagcataagctttggagtattagttatttgtatcgttagattcagggaccattttagatacctactttgagaaaggggcccggctcgttgtagtaacttgaaagcgcttacgtgaataggacgttggatctcccatttcgtaggtaaataaatgttctccacatggccacgtgcgaggggtttcaactataatgcgcttcttatctttaaccggcgggtccgttacggggacgcgaacatagttgtgcgctagtgggcatgtatacagtacaggaactcgactcacactttttcaaaacaggaatgactacactccttgttttcgtggctggg'
-string =  'gtcaacaaccacaggaggaagctaggccttggtccgtgaaggacgc-gtccaacgatatgacaacaggcaaagggaaaaattgacaggactctccgactat'
-pattern = '                                         g-cgcggtcca'
+# string =  'gtcaacaaccacaggaggaagctaggccttggtccgtgaaggacgc-gtccaacgatatgacaacaggcaaagggaaaaattgacaggactctccgactat'
+# pattern = '                                         g-cgcggtcca'
 
-string = 'gtcaacaaccacaggaggaagctaggccttggtccgtgaaggacgcgtccaacgatatgacaacaggcaaagggaaaaattgacaggactctccgactat'
-pattern = 'gcgcggtcca'
-SA = SuffixArray(string)
-print(approx_positions(string, pattern, SA, 2))
+# string = 'gtcaacaaccacaggaggaagctaggccttggtccgtgaaggacgcgtccaacgatatgacaacaggcaaagggaaaaattgacaggactctccgactat'
+# pattern = 'gcgcggtcca'
 
-# caaaagtaga
-# caaaagt-ga
-# problem med insertion?? test scriptet fjerner basically en base i read
+# string = 'gcaagccatgtggtgaaacatcagctttatgcattccagcagtcgtggttgtctcagatcgagcaaatttcaactcggcttagttcgatttaagactacggtacgccttaaccttccgggtggaatatctcaagtttgaggtaatttttcgtcatcagatccgaagacaggcagctatactaagcagcgaccctccggtgatactaagcgtaacaagctctgctatgctgtgcgaaactcttttgcctacacggctgataccgtatcgggggacaaagtgttgcaacgtccgtgcgacgcattgccaaatgatgccagacgagcgtctaaagtacatatcataatcgggtggcggatctcgatcatctgtgtttgcacttgtacaaagctaaagactctacctaacaacttccgtgtggccaatgattaagcttagggggttctgaagagcgatgattcccgctctgccagaacgtcgacgtatgcatgatatgcttcagcctacaaaggataaaaccattgcgacgttattagatttacaaagcgacgatcgtcagttcttcctcactactcgcgtattgatctgggatatgaatgacctcgggacccctgtcgcaatgcaagacaatcctacaagattcggccgctaagggtctcatcccgctatgcgccgttattgggaccgttaaccgcacatccgtcagaggggttgagaaacgcccgagtttgtacttttagctgcacgagcaaggtccaccaagtgagtacatccgctagtaagcttgggcacacctggtaagaggatccgggcccattagattccaatctaggatgtgacacgcgagtaggcagaaaagcatcgggccaggtacaacacatgggaaggactattgtattaagctagctatgagtccagtggtggtttactaccgttgcggcctgtacctcgtccgggtccaagcgccgtccttaggaactgttaaacagacgtcatcgccgc'
+# pattern = 'tgcgacgcaa'
+# SA = SuffixArray(string)
+# print(approx_positions(string, pattern, SA, 1))
 
 
 
