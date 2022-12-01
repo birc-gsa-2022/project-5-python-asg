@@ -101,7 +101,7 @@ def local_alignment(seq1, seq2, d):
             else: row, col = len(seq1), last_row_min_d_pos
         
         edit_distance = matrix[row,col]
-        if edit_distance < d:
+        if edit_distance <= d:
             while True:
                 cur = matrix[row, col]
                 cost = 0 if seq1[row - 1] == seq2[col - 1] else 1
@@ -275,11 +275,11 @@ def approx_positions(string, pattern, SA, d):
 # if in ['-', pattern[-1]] (test if new match right)
 ###########################################################
 # Usage:
-# string = 'ttgatgaaacgtcgctgctacataggagattcccggcaggcgctatgccttggatgagactaaaggtcacctactccattcctacttccttcagtggagaacgctgcggtccggaagatttgactgagacccgcttaaagttttccgtgcatatttgtagtactaagcgcggctcgatgatgttacacgcttaatccacagttggaggtcatccatgggtgcaccaatgcgtttaagtcagagttaccgatcgttcttaagtgagcttctcggcgaattgtacggaggtgtgctatcactcgttccataagtggcgtactgattatcttcactgacccgcctagacttgtaagcttcgaacagactccgccaatgagagcgtgcaatggtgtacggcattacggagacggtagcgtccaacggaagggccagagtattagattcatttgaaaagaacactgacttttgctaacaaaagctcgggcgtggtaagcggttca'
-# pattern = '                                                                                                       tgcgggat'
-# pattern = 'tgcgggat'
-# SA = SuffixArray(string)
-# print(approx_positions(string, pattern, SA, 2)) 
+string = 'ttgatgaaacgtcgctgctacataggagattcccggcaggcgctatgccttggatgagactaaaggtcacctactccattcctacttccttcagtggagaacgctgcggtccggaagatttgactgagacccgcttaaagttttccgtgcatatttgtagtactaagcgcggctcgatgatgttacacgcttaatccacagttggaggtcatccatgggtgcaccaatgcgtttaagtcagagttaccgatcgttcttaagtgagcttctcggcgaattgtacggaggtgtgctatcactcgttccataagtggcgtactgattatcttcactgacccgcctagacttgtaagcttcgaacagactccgccaatgagagcgtgcaatggtgtacggcattacggagacggtagcgtccaacggaagggccagagtattagattcatttgaaaagaacactgacttttgctaacaaaagctcgggcgtggtaagcggttca'
+pattern = '                                                                                                       tgcgggat'
+pattern = 'tgcgggat'
+SA = SuffixArray(string)
+print(approx_positions(string, pattern, SA, 2)) 
 
 
 
