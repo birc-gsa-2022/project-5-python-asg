@@ -92,14 +92,17 @@ def local_alignment(seq1, seq2, d):
         
         # Allowing mismatches:
         last_row = matrix[len(seq1),:]
-        last_row_min_d_pos = len(last_row)-(d+1)+np.argmin(last_row[-(d+1):])
+        last_row_min_d_pos = len(last_row)-(2*d)+np.argmin(last_row[-(2*d):])
         last_col = matrix[:,len(seq2)]
-        last_col_min_d_pos = len(last_col)-(d+1)+np.argmin(last_col[-(d+1):])
+        last_col_min_d_pos = len(last_col)-(2*d)+np.argmin(last_col[-(2*d):])
         if last_row[last_row_min_d_pos] < matrix[row,col] or last_col[last_col_min_d_pos] < matrix[row,col]:
             if last_col[last_col_min_d_pos] < last_row[last_row_min_d_pos]:
                 row, col = last_col_min_d_pos, len(seq2)
             else: row, col = len(seq1), last_row_min_d_pos
         edit_distance = matrix[row,col]
+        
+        # last_row = matrix[len(seq1),:]
+        # row, col = len(seq1), np.argmin(last_row)
 
         while True:
             cur = matrix[row, col]
@@ -182,6 +185,10 @@ def approx_positions(string, pattern, SA, d):
                 j+=1
             ends_dist = (s_dist+e_dist)
 
+            # if 100 < tup[0] < 105:
+                # print(alignment[0], alignment[1])
+                # print(alignment[3], tup[0])
+
             # Report all paths of matrix within d edits:
             d_max = (d+ends_dist)
             if alignment[2] <= d_max:
@@ -192,9 +199,10 @@ def approx_positions(string, pattern, SA, d):
                 seq1, seq2 = list(pattern), list(seq)
                 row, col = len(seq1), len(seq2)
                 stack = set()
-                for i in range(d+1):
+                for i in range(d_max+1):
                     stack.add(('', '', row-i, col, 0))  # alignment1, alignment2, row, col, mismatches.
                     stack.add(('', '', row, col-i, 0))  # alignment1, alignment2, row, col, mismatches.
+                # stack.add(('', '', row, col-3, 0))
                 while len(stack) > 0:
                     cur = stack.pop()
                     row, col = cur[2], cur[3]
@@ -251,7 +259,7 @@ def approx_positions(string, pattern, SA, d):
         al1 = alignment[1][0+start_gaps:len(alignment[1])-end_gaps]
         al2 = alignment[2][0+start_gaps:len(alignment[2])-end_gaps]
         pos = alignment[0]+(start_gaps)
-        # print(al1,al2)
+        # print(pos, al1,al2)
         if len(al1) >= (len(pattern) + al1.count('-')):
             mm = 0
             for i in range(len(al1)):
@@ -268,11 +276,14 @@ def approx_positions(string, pattern, SA, d):
 # if in ['-', pattern[-1]] (test if new match right)
 ###########################################################
 # Usage:
-# string = 'gcccatgcctcccgacaaggcattacatggtgaatggattgaggtggaacttatgtaagcaaagtatttgaatacgacatacctacaaatgcagccgtta'
-# pattern = '                                                          caaagtagt'
-# pattern = 'caaagtagt'
+# string = 'ttgatgaaacgtcgctgctacataggagattcccggcaggcgctatgccttggatgagactaaaggtcacctactccattcctacttccttcagtggagaacgctgcggtccggaagatttgactgagacccgcttaaagttttccgtgcatatttgtagtactaagcgcggctcgatgatgttacacgcttaatccacagttggaggtcatccatgggtgcaccaatgcgtttaagtcagagttaccgatcgttcttaagtgagcttctcggcgaattgtacggaggtgtgctatcactcgttccataagtggcgtactgattatcttcactgacccgcctagacttgtaagcttcgaacagactccgccaatgagagcgtgcaatggtgtacggcattacggagacggtagcgtccaacggaagggccagagtattagattcatttgaaaagaacactgacttttgctaacaaaagctcgggcgtggtaagcggttca'
+# pattern = '                                                                                                       tgcgggat'
+# pattern = 'tgcgggat'
 # SA = SuffixArray(string)
 # print(approx_positions(string, pattern, SA, 2))
 
-# start evt fra 0,0 ??
-# fuldt hus mangler!!! HINT!
+
+
+
+
+
