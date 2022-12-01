@@ -92,49 +92,46 @@ def local_alignment(seq1, seq2, d):
         
         # Allowing mismatches:
         last_row = matrix[len(seq1),:]
-        last_row_min_d_pos = len(last_row)-(2*d)+np.argmin(last_row[-(2*d):])
+        last_row_min_d_pos = len(last_row)-(d)+np.argmin(last_row[-(d):])
         last_col = matrix[:,len(seq2)]
-        last_col_min_d_pos = len(last_col)-(2*d)+np.argmin(last_col[-(2*d):])
+        last_col_min_d_pos = len(last_col)-(d)+np.argmin(last_col[-(d):])
         if last_row[last_row_min_d_pos] < matrix[row,col] or last_col[last_col_min_d_pos] < matrix[row,col]:
             if last_col[last_col_min_d_pos] <= last_row[last_row_min_d_pos]:
                 row, col = last_col_min_d_pos, len(seq2)
             else: row, col = len(seq1), last_row_min_d_pos
-        edit_distance = matrix[row,col]
         
-        # print(''.join(seq1), ''.join(seq2))
-        # print(matrix)
-        # row, col = len(seq1), last_row_min_d_pos
-        # edit_distance = matrix[row,col]
-        # last_row = matrix[len(seq1),:]
-        # print(last_row_min_d_pos, np.argmin(last_row))
-        # row, col = len(seq1), last_row_min_d_pos
-        # edit_distance = matrix[row,col]
-
-        while True:
-            cur = matrix[row, col]
-            cost = 0 if seq1[row - 1] == seq2[col - 1] else 1
-            vertical = matrix[row-1, col]
-            diagonal = matrix[row - 1, col - 1]
-            horizontal = matrix[row, col - 1]
-            if cur == diagonal + cost: # and diagonal <= d and row>0 and col>0:
-                aligned1 += [seq1[row - 1]]
-                aligned2 += [seq2[col - 1]]
-                row, col = row - 1, col - 1
-            else:
-                if cur == vertical + 1: # and vertical <= d and row>0:
+        edit_distance = matrix[row,col]
+        if edit_distance < d:
+            while True:
+                cur = matrix[row, col]
+                cost = 0 if seq1[row - 1] == seq2[col - 1] else 1
+                vertical = matrix[row-1, col]
+                diagonal = matrix[row - 1, col - 1]
+                horizontal = matrix[row, col - 1]
+                if cur == diagonal + cost:
                     aligned1 += [seq1[row - 1]]
-                    aligned2 += ["-"]
-                    row, col = row - 1, col
-                elif cur == horizontal + 1: # and horizontal <= d and col>0:
-                    aligned1 += ["-"]
                     aligned2 += [seq2[col - 1]]
-                    row, col = row, col - 1
-            if row == 0 and col == 0:
-                return ''.join(aligned1[::-1]), ''.join(aligned2[::-1]), edit_distance
+                    row, col = row - 1, col - 1
+                else:
+                    if cur == vertical + 1:
+                        aligned1 += [seq1[row - 1]]
+                        aligned2 += ["-"]
+                        row, col = row - 1, col
+                    elif cur == horizontal + 1:
+                        aligned1 += ["-"]
+                        aligned2 += [seq2[col - 1]]
+                        row, col = row, col - 1
+                if row == 0 and col == 0:
+                    return ''.join(aligned1[::-1]), ''.join(aligned2[::-1]), edit_distance
+        else: 
+            return None
 
     matrix = create_matrix(seq1, seq2)
-    seq1_aligned, seq2_aligned, edit_distance = backtrace(seq1, seq2, matrix, d)
-    return (seq1_aligned, seq2_aligned, edit_distance, matrix)
+    if backtrace(seq1, seq2, matrix, d) != None:
+        seq1_aligned, seq2_aligned, edit_distance = backtrace(seq1, seq2, matrix, d)
+        return (seq1_aligned, seq2_aligned, edit_distance, matrix)
+    else: 
+        return None
 
 
 def approx_positions(string, pattern, SA, d):
@@ -178,77 +175,73 @@ def approx_positions(string, pattern, SA, d):
     for tup in possible_intervals:
         seq = string[tup[0]:tup[1]]
         if 0 <= abs(len(seq) - len(pattern)) <= (2*d) and len(seq) > 0 and len(pattern) > 0:
-            alignment = local_alignment(pattern, seq, d)
-            s_dist = 0
-            j = 0
-            while alignment[0][j] == '-' :
-                s_dist+=1
-                j+=1
-            e_dist = 0
-            j = 0
-            while alignment[0][::-1][j] == '-':
-                e_dist+=1
-                j+=1
-            ends_dist = (s_dist+e_dist)
+            alignment = local_alignment(pattern, seq, 2*d)
+            if alignment != None:
+                s_dist = 0
+                j = 0
+                while alignment[0][j] == '-' :
+                    s_dist+=1
+                    j+=1
+                e_dist = 0
+                j = 0
+                while alignment[0][::-1][j] == '-':
+                    e_dist+=1
+                    j+=1
+                ends_dist = (s_dist+e_dist)
 
-            # if 100 < tup[0] < 105:
-                # print(alignment[0], alignment[1])
-                # print(alignment[3], tup[0])
-
-            # Report all paths of matrix within d edits:
-            d_max = (d+ends_dist)
-            if alignment[2] <= d_max:
-                # print('Alignments:', alignment[0], alignment[1])
-                # print('Matrix_and_pos: \n', alignment[3], tup[0])
-
-                matrix = alignment[3]
-                seq1, seq2 = list(pattern), list(seq)
-                row, col = len(seq1), len(seq2)
-                stack = set()
-                for i in range(d_max+1):
-                    stack.add(('', '', row-i, col, 0))  # alignment1, alignment2, row, col, mismatches.
-                    stack.add(('', '', row, col-i, 0))  # alignment1, alignment2, row, col, mismatches.
-                # stack.add(('', '', row, col-3, 0))
-                while len(stack) > 0:
-                    cur = stack.pop()
-                    row, col = cur[2], cur[3]
-
-                    if row == 0 and col == 0:
-                        align1, align2 = ''.join(cur[0])[::-1], ''.join(cur[1])[::-1]
-                        if align1.count('-')<=d_max and align2.count('-')<=d_max:
-                            approx_pos.add((tup[0], align1, align2))
+                # Report all paths of matrix within d edits:
+                d_max = (d+ends_dist)
+                if alignment[2] <= d_max:
+                    # print('Alignments:', alignment[0], alignment[1])
+                    # print('Matrix_and_pos: \n', alignment[3], tup[0])
                     
-                    else: 
-                        vertical = matrix[row-1, col]
-                        diagonal = matrix[row-1, col-1]
-                        horizontal = matrix[row, col-1]
+                    seq1, seq2 = list(pattern), list(seq)
+                    matrix = alignment[3]  
+                    row, col = len(seq1), len(seq2)
+                    stack = set()
+                    for i in range(d_max+1):
+                        stack.add(('', '', row-i, col, 0))  # alignment1, alignment2, row, col, mismatches.
+                        stack.add(('', '', row, col-i, 0))  # alignment1, alignment2, row, col, mismatches.
+                    while len(stack) > 0:
+                        cur = stack.pop()
+                        row, col = cur[2], cur[3]
+
+                        if row == 0 and col == 0:
+                            align1, align2 = ''.join(cur[0])[::-1], ''.join(cur[1])[::-1]
+                            if align1.count('-')<=d_max and align2.count('-')<=d_max:
+                                approx_pos.add((tup[0], align1, align2))
                         
-                        if matrix[row,col] == diagonal and diagonal <= d_max and row>0 and col>0:
-                            path_tup = ( cur[0]+seq1[row-1], cur[1]+seq2[col-1], row-1, col-1, cur[4] )
-                            if path_tup[4] <= d_max:
-                                stack.add(path_tup)
-                        if matrix[row,col] == diagonal+1 and diagonal+1 <= d_max and row>0 and col>0:
-                            path_tup = ( cur[0]+seq1[row-1], cur[1]+seq2[col-1], row-1, col-1, cur[4]+1 )
-                            if path_tup[4] <= d_max:
-                                stack.add((path_tup))
-                        
-                        if matrix[row,col] == vertical and vertical <= d_max and row>0:
-                            path_tup = ( cur[0]+seq1[row - 1], cur[1]+"-", row-1, col, cur[4]+1 )
-                            if path_tup[4] <= d_max:
-                                stack.add(path_tup)
-                        if matrix[row,col] == vertical+1 and vertical+1 <= d_max and row>0:
-                            path_tup = ( cur[0]+seq1[row - 1], cur[1]+"-", row-1, col, cur[4]+1 )
-                            if path_tup[4] <= d_max:
-                                stack.add(path_tup)
-                        
-                        if matrix[row,col] == horizontal and horizontal <= d_max and col>0:
-                            path_tup = ( cur[0]+"-", cur[1]+seq2[col-1], row, col-1, cur[4]+1 )
-                            if path_tup[4] <= d_max:
-                                stack.add(path_tup)
-                        if matrix[row,col] == (horizontal+1) and (horizontal+1) <= d_max and col>0:
-                            path_tup = ( cur[0]+"-", cur[1]+seq2[col-1], row, col-1, cur[4]+1 )
-                            if path_tup[4] <= d_max:
-                                stack.add(path_tup)
+                        else: 
+                            vertical = matrix[row-1, col]
+                            diagonal = matrix[row-1, col-1]
+                            horizontal = matrix[row, col-1]
+                            
+                            if matrix[row,col] == diagonal and diagonal <= d_max and row>0 and col>0:
+                                path_tup = ( cur[0]+seq1[row-1], cur[1]+seq2[col-1], row-1, col-1, cur[4] )
+                                if path_tup[4] <= d_max:
+                                    stack.add(path_tup)
+                            if matrix[row,col] == diagonal+1 and diagonal+1 <= d_max and row>0 and col>0:
+                                path_tup = ( cur[0]+seq1[row-1], cur[1]+seq2[col-1], row-1, col-1, cur[4]+1 )
+                                if path_tup[4] <= d_max:
+                                    stack.add((path_tup))
+                            
+                            if matrix[row,col] == vertical and vertical <= d_max and row>0:
+                                path_tup = ( cur[0]+seq1[row - 1], cur[1]+"-", row-1, col, cur[4]+1 )
+                                if path_tup[4] <= d_max:
+                                    stack.add(path_tup)
+                            if matrix[row,col] == vertical+1 and vertical+1 <= d_max and row>0:
+                                path_tup = ( cur[0]+seq1[row - 1], cur[1]+"-", row-1, col, cur[4]+1 )
+                                if path_tup[4] <= d_max:
+                                    stack.add(path_tup)
+                            
+                            if matrix[row,col] == horizontal and horizontal <= d_max and col>0:
+                                path_tup = ( cur[0]+"-", cur[1]+seq2[col-1], row, col-1, cur[4]+1 )
+                                if path_tup[4] <= d_max:
+                                    stack.add(path_tup)
+                            if matrix[row,col] == (horizontal+1) and (horizontal+1) <= d_max and col>0:
+                                path_tup = ( cur[0]+"-", cur[1]+seq2[col-1], row, col-1, cur[4]+1 )
+                                if path_tup[4] <= d_max:
+                                    stack.add(path_tup)
 
     for alignment in approx_pos:
         start_gaps = 0
