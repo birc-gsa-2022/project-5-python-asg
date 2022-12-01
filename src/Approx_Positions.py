@@ -96,7 +96,7 @@ def local_alignment(seq1, seq2, d):
         t1 = matrix[last_col_min_d_pos, len(seq2)]       
         t2 = matrix[len(seq1), last_row_min_d_pos]
         edit_distance = min(t0,t1,t2)
-        if edit_distance <= d:
+        if edit_distance < d:
             return edit_distance
         else: 
             return None
@@ -148,7 +148,7 @@ def approx_positions(string, pattern, SA, d):
     
     # Get all matrices with best-fit <= d+chopped_pattern_ends:
     for tup in possible_intervals:
-        seq, d_max = string[tup[0]:tup[1]], (d*2)
+        seq, d_max = string[tup[0]:tup[1]], d*2
         if 0 <= abs(len(seq) - len(pattern)) <= d_max:
             alignment = local_alignment(pattern, seq, d_max)
             if alignment != None:
