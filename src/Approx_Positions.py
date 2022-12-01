@@ -146,18 +146,17 @@ def approx_positions(string, pattern, SA, d):
     possible_intervals = list(possible_intervals)
     # print('possible_intervals:', possible_intervals)
     
-    # Get all matrices with best-fit <= d+chopped_pattern_ends:
+    # Get all matrices with best-fit <= d*2:
     for tup in possible_intervals:
         seq, d_max = string[tup[0]:tup[1]], d*2
         if 0 <= abs(len(seq) - len(pattern)) <= d_max:
-            alignment = local_matrix(pattern, seq, d_max)
-            if alignment != None:
-                if alignment[0] <= d_max:
-                    # print('Alignments:', alignment[0], alignment[1])
-                    # print('Matrix_and_pos: \n', alignment[3], tup[0])
+            matrix_inf = local_matrix(pattern, seq, d_max)
+            if matrix_inf != None:
+                if matrix_inf[0] <= d_max:
+                    # print('Matrix_and_pos: \n', alignment[1], tup[0])
                     
                     seq1, seq2 = list(pattern), list(seq)
-                    matrix = alignment[1]  
+                    matrix = matrix_inf[1]  
                     row, col = len(seq1), len(seq2)
                     stack = set()
                     for i in range(d_max):
@@ -212,7 +211,6 @@ def approx_positions(string, pattern, SA, d):
                                 path_tup = ( cur[0]+"-", cur[1]+seq2[col-1], row, col-1, cur[4]+1 )
                                 if path_tup[4] < d_max:
                                     stack.add(path_tup)
-
     for alignment in approx_pos:
         start_gaps = 0
         j = 0
@@ -225,18 +223,31 @@ def approx_positions(string, pattern, SA, d):
             end_gaps+=1
             j+=1
         
-        al1 = alignment[1][0+start_gaps:len(alignment[1])-end_gaps]
-        al2 = alignment[2][0+start_gaps:len(alignment[2])-end_gaps]
-        pos = alignment[0]+(start_gaps)
+
+        # al1 = alignment[1][0+start_gaps:len(alignment[1])-end_gaps]
+        # al2 = alignment[2][0+start_gaps:len(alignment[2])-end_gaps]
+        ends_gaps = (start_gaps+end_gaps)
+        al1_indels = alignment[1].count('-') - ends_gaps
+        pos = alignment[0]+start_gaps
         # print(pos, al1,al2)
-        if len(al1) >= (len(pattern) + al1.count('-')):
+        # if len(al1) >= (len(pattern) + al1.count('-')):
+        #     mm = 0
+        #     for i in range(len(al1)):
+        #         if al1[i] != al2[i]:
+        #             mm+=1
+        #     if mm <= d:
+        #         approx_trimmed.add((pos,al1,al2))
+
+        if len(alignment[1])-ends_gaps >= len(pattern) + al1_indels:
             mm = 0
-            for i in range(len(al1)):
-                if al1[i] != al2[i]:
+            for i in range(len(alignment[1])-ends_gaps):
+                if alignment[1][i+start_gaps] != alignment[2][i+start_gaps]:
                     mm+=1
             if mm <= d:
+                al1 = alignment[1][0+start_gaps:len(alignment[1])-end_gaps]
+                al2 = alignment[2][0+start_gaps:len(alignment[2])-end_gaps]
                 approx_trimmed.add((pos,al1,al2))
-                    
+
     return list(approx_trimmed)
 
 
@@ -245,10 +256,6 @@ def approx_positions(string, pattern, SA, d):
 # if in ['-', pattern[-1]] (test if new match right)
 ###########################################################
 # Usage:
-# string =  'ttgatgaaacgtcgctgctacataggagattcccggcaggcgctatgccttggatgagactaaaggtcacctactccattcctacttccttcagtggagaacgctgcggtccggaagatttgactgagacccgcttaaagttttccgtgcatatttgtagtactaagcgcggctcgatgatgttacacgcttaatccacagttggaggtcatccatgggtgcaccaatgcgtttaagtcagagttaccgatcgttcttaagtgagcttctcggcgaattgtacggaggtgtgctatcactcgttccataagtggcgtactgattatcttcactgacccgcctagacttgtaagcttcgaacagactccgccaatgagagcgtgcaatggtgtacggcattacggagacggtagcgtccaacggaagggccagagtattagattcatttgaaaagaacactgacttttgctaacaaaagctcgggcgtggtaagcggttca'
-# pattern = '                                                                                                       tgcgggat'
-# pattern = 'tgcgggat'
-
 # string = 'cgcttaccgttcttaaggctattgcgaaacaggctatgattttgaccctgaccgttcagtcgtcaaaatctcgattctagtacgtgggatttctagacgtcaac-ccccgtgaccgattctgaaaggaattctaggggaatagtcgacttagcgacactggttgaccggggagcacacgatcggacttcccgagacccagatcgaagagcgtctcgtccacgtgccggagacaatagcggggatgaccgggtcgtgcccttctggccgtaactcgaattgtcgaggtggctagcgtccgttccagaagtacttaagtcgataatgagctgggacctagattttcaagcgaacagatgtacacctttcgtggtcgtactaaggcttcgtgtaagtagttggggactgttcacactaatagcatcggaattcttcatgaatcaatcgtatcgattgactacctgcacattgattcactcgtctgaggacgtgcgttaccagataagccgagagtacccgatctatcagaatggatacccctcacagggatctattagtagttacacgggtggtgccaccccagagcgccaacttcttacttgacacgttgggtacgacagaaagttcaacgcgattttccggattagacagttccgtgttaccgctcagacacatcccgcatcccaagttacaaacacgtccaaattgaacctagcgatctccgcggaacatacagttttttgagaaataagtacgtttctcacggccgttgctaactcccgattgaccacctgcgacgttaaaaatcttacagtgcgacactggatcaccaaatggccggtgacatacgcccatacgaataagatcacgggcacttttgccactaggattcaaattccacgtagttcttacaaggaacaacaacaaagataaacttgtacagttgatgcgagcaactgattctacaaaaatccgcatgccagagatgaatttgtaccctatt'
 # pattern = '                                                                                                     a-cccccgtga'
 # string = 'cgcttaccgttcttaaggctattgcgaaacaggctatgattttgaccctgaccgttcagtcgtcaaaatctcgattctagtacgtgggatttctagacgtcaacccccgtgaccgattctgaaaggaattctaggggaatagtcgacttagcgacactggttgaccggggagcacacgatcggacttcccgagacccagatcgaagagcgtctcgtccacgtgccggagacaatagcggggatgaccgggtcgtgcccttctggccgtaactcgaattgtcgaggtggctagcgtccgttccagaagtacttaagtcgataatgagctgggacctagattttcaagcgaacagatgtacacctttcgtggtcgtactaaggcttcgtgtaagtagttggggactgttcacactaatagcatcggaattcttcatgaatcaatcgtatcgattgactacctgcacattgattcactcgtctgaggacgtgcgttaccagataagccgagagtacccgatctatcagaatggatacccctcacagggatctattagtagttacacgggtggtgccaccccagagcgccaacttcttacttgacacgttgggtacgacagaaagttcaacgcgattttccggattagacagttccgtgttaccgctcagacacatcccgcatcccaagttacaaacacgtccaaattgaacctagcgatctccgcggaacatacagttttttgagaaataagtacgtttctcacggccgttgctaactcccgattgaccacctgcgacgttaaaaatcttacagtgcgacactggatcaccaaatggccggtgacatacgcccatacgaataagatcacgggcacttttgccactaggattcaaattccacgtagttcttacaaggaacaacaacaaagataaacttgtacagttgatgcgagcaactgattctacaaaaatccgcatgccagagatgaatttgtaccctatt'
