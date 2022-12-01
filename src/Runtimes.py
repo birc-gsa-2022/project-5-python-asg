@@ -1,19 +1,17 @@
-###############################################################
-# libraries:
+# ###############################################################
+# # libraries:
 
-import time
-import random
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
+# import time
+# import random
+# import numpy as np
+# import matplotlib.pyplot as plt
+# import seaborn as sns
 
-###############################################################
-# functions:
+# ###############################################################
+# # functions:
 
-# from All_python_functions import SuffixArray
-# from All_python_functions import approx_search
-# # from Readmapper_Cython_Convert import SuffixArray
-# # from Readmapper_Cython_Convert import approx_search
+# from Approx_Positions import SuffixArray
+# from Approx_Positions import approx_search
 # from SEQsimulator import simulate_string
 # from SEQsimulator import get_exact_read
 # from naive import naive_algorithm
@@ -24,7 +22,7 @@ import seaborn as sns
 # SA = SuffixArray(string)
 # print(approx_search(string, pattern, SA, 2))
 
-###############################################################
+# ##############################################################
 # tests:
  
 # 1mio test SA:
@@ -154,4 +152,4 @@ import seaborn as sns
 # plt.tight_layout()
 # plt.show()
 
-###############################################################
+# ###############################################################
