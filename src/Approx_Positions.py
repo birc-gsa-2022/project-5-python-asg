@@ -174,20 +174,9 @@ def approx_positions(string, pattern, SA, d):
     # Get all matrices with best-fit <= d+chopped_pattern_ends:
     for tup in possible_intervals:
         seq = string[tup[0]:tup[1]]
-        if 0 <= abs(len(seq) - len(pattern)) <= d and len(seq) > 0 and len(pattern) > 0:
+        if 0 <= abs(len(seq) - len(pattern)):
             alignment = local_alignment(pattern, seq, d*2)
             if alignment != None:
-            #     s_dist = 0
-            #     j = 0
-            #     while alignment[0][j] == '-' :
-            #         s_dist+=1
-            #         j+=1
-            #     e_dist = 0
-            #     j = 0
-            #     while alignment[0][::-1][j] == '-':
-            #         e_dist+=1
-            #         j+=1
-            #     ends_dist = (s_dist+e_dist)
 
                 # Report all paths of matrix within d edits:
                 d_max = (d*2)
@@ -209,7 +198,7 @@ def approx_positions(string, pattern, SA, d):
 
                         if row == 0 and col == 0:
                             align1, align2 = ''.join(cur[0])[::-1], ''.join(cur[1])[::-1]
-                            if align1.count('-')<=d and align2.count('-')<=d:
+                            if align1.count('-') + align2.count('-') <= d_max:
                                 approx_pos.add((tup[0], align1, align2))
                         
                         else: 
