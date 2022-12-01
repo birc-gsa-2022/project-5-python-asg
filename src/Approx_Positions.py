@@ -93,12 +93,13 @@ def local_alignment(seq1, seq2, d):
         # Allowing mismatches:
         last_row = matrix[len(seq1),:]
         last_row_min_d_pos = len(last_row)-(2*d)+np.argmin(last_row[-(2*d):])
-        last_col = matrix[:,len(seq2)]
-        last_col_min_d_pos = len(last_col)-(2*d)+np.argmin(last_col[-(2*d):])
-        if last_row[last_row_min_d_pos] < matrix[row,col] or last_col[last_col_min_d_pos] < matrix[row,col]:
-            if last_col[last_col_min_d_pos] < last_row[last_row_min_d_pos]:
-                row, col = last_col_min_d_pos, len(seq2)
-            else: row, col = len(seq1), last_row_min_d_pos
+        # last_col = matrix[:,len(seq2)]
+        # last_col_min_d_pos = len(last_col)-(2*d)+np.argmin(last_col[-(2*d):])
+        # if last_row[last_row_min_d_pos] < matrix[row,col] or last_col[last_col_min_d_pos] < matrix[row,col]:
+        #     if last_col[last_col_min_d_pos] < last_row[last_row_min_d_pos]:
+        #         row, col = last_col_min_d_pos, len(seq2)
+        #     else: row, col = len(seq1), last_row_min_d_pos
+        row, col = len(seq1), last_row_min_d_pos
         edit_distance = matrix[row,col]
         
         # last_row = matrix[len(seq1),:]
