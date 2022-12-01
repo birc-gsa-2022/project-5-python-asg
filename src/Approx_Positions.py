@@ -280,7 +280,7 @@ def approx_positions(string, pattern, SA, d):
 # pattern = '                                                                                                       tgcgggat'
 # pattern = 'tgcgggat'
 # SA = SuffixArray(string)
-# print(approx_positions(string, pattern, SA, 2))
+# print(approx_positions(string, pattern, SA, 2)) 
 
 
 
