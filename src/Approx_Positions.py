@@ -200,7 +200,9 @@ def approx_positions(string, pattern, SA, d):
                     row, col = cur[2], cur[3]
 
                     if row == 0 and col == 0:
-                        approx_pos.add((tup[0], ''.join(cur[0])[::-1], ''.join(cur[1])[::-1]))
+                        align1, align2 = ''.join(cur[0])[::-1], ''.join(cur[1])[::-1]
+                        if align1.count('-')<=d_max and align2.count('-')<=d_max:
+                            approx_pos.add((tup[0], align1, align2))
                     
                     else: 
                         vertical = matrix[row-1, col]
@@ -246,7 +248,7 @@ def approx_positions(string, pattern, SA, d):
         al2 = alignment[2][0+start_gaps:len(alignment[2])-end_gaps]
         pos = alignment[0]+(start_gaps)
         # print(al1,al2)
-        if len(al1) >= len(pattern):
+        if len(al1) >= (len(pattern)) + al1.count('-'):
             mm = 0
             for i in range(len(al1)):
                 if al1[i] != al2[i]:
@@ -262,10 +264,11 @@ def approx_positions(string, pattern, SA, d):
 # if in ['-', pattern[-1]] (test if new match right)
 ###########################################################
 # Usage:
-string = 'gcccatgcctcccgacaaggcattacatggtgaatggattgaggtggaacttatgtaagcaaagtatttgaatacgacatacctacaaatgcagccgtta'
-pattern = 'caaagtagt'
-SA = SuffixArray(string)
-print(approx_positions(string, pattern, SA, 2))
+# string = 'gcccatgcctcccgacaaggcattacatggtgaatggattgaggtggaacttatgtaagcaaagtatttgaatacgacatacctacaaatgcagccgtta'
+# pattern = '                                                          caaagtagt'
+# pattern = 'caaagtagt'
+# SA = SuffixArray(string)
+# print(approx_positions(string, pattern, SA, 2))
 
 # start evt fra 0,0 ??
 # fuldt hus mangler!!! HINT!
