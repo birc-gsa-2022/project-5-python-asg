@@ -86,50 +86,25 @@ def local_alignment(seq1, seq2, d):
         return matrix
 
     def backtrace(seq1, seq2, matrix, d):
-        seq1, seq2 = list(seq1), list(seq2)
-        aligned1, aligned2 = [], []
         row, col = len(seq1), len(seq2)
-        
         # Allowing mismatches:
         last_row = matrix[len(seq1),:]
         last_row_min_d_pos = len(last_row)-(d)+np.argmin(last_row[-(d):])
         last_col = matrix[:,len(seq2)]
         last_col_min_d_pos = len(last_col)-(d)+np.argmin(last_col[-(d):])
-        if last_row[last_row_min_d_pos] < matrix[row,col] or last_col[last_col_min_d_pos] < matrix[row,col]:
-            if last_col[last_col_min_d_pos] <= last_row[last_row_min_d_pos]:
-                row, col = last_col_min_d_pos, len(seq2)
-            else: row, col = len(seq1), last_row_min_d_pos
-        
-        edit_distance = matrix[row,col]
+        t0 = matrix[last_col_min_d_pos, len(seq2)]
+        t1 = matrix[last_col_min_d_pos, len(seq2)]       
+        t2 = matrix[len(seq1), last_row_min_d_pos]
+        edit_distance = min(t0,t1,t2)
         if edit_distance <= d:
-            while True:
-                cur = matrix[row, col]
-                cost = 0 if seq1[row - 1] == seq2[col - 1] else 1
-                vertical = matrix[row-1, col]
-                diagonal = matrix[row - 1, col - 1]
-                horizontal = matrix[row, col - 1]
-                if cur == diagonal + cost:
-                    aligned1 += [seq1[row - 1]]
-                    aligned2 += [seq2[col - 1]]
-                    row, col = row - 1, col - 1
-                else:
-                    if cur == vertical + 1:
-                        aligned1 += [seq1[row - 1]]
-                        aligned2 += ["-"]
-                        row, col = row - 1, col
-                    elif cur == horizontal + 1:
-                        aligned1 += ["-"]
-                        aligned2 += [seq2[col - 1]]
-                        row, col = row, col - 1
-                if row == 0 and col == 0:
-                    return ''.join(aligned1[::-1]), ''.join(aligned2[::-1]), edit_distance
+            return edit_distance
         else: 
             return None
 
     matrix = create_matrix(seq1, seq2)
     if backtrace(seq1, seq2, matrix, d) != None:
-        seq1_aligned, seq2_aligned, edit_distance = backtrace(seq1, seq2, matrix, d)
-        return (seq1_aligned, seq2_aligned, edit_distance, matrix)
+        edit_distance = backtrace(seq1, seq2, matrix, d)
+        return (edit_distance, matrix)
     else: 
         return None
 
@@ -174,18 +149,18 @@ def approx_positions(string, pattern, SA, d):
     # Get all matrices with best-fit <= d+chopped_pattern_ends:
     for tup in possible_intervals:
         seq = string[tup[0]:tup[1]]
-        if 0 <= abs(len(seq) - len(pattern)):
+        if 0 <= abs(len(seq) - len(pattern)) <= d*2:
             alignment = local_alignment(pattern, seq, d*2)
             if alignment != None:
 
                 # Report all paths of matrix within d edits:
                 d_max = (d*2)
-                if alignment[2] <= d_max:
+                if alignment[0] <= d_max:
                     # print('Alignments:', alignment[0], alignment[1])
                     # print('Matrix_and_pos: \n', alignment[3], tup[0])
                     
                     seq1, seq2 = list(pattern), list(seq)
-                    matrix = alignment[3]  
+                    matrix = alignment[1]  
                     row, col = len(seq1), len(seq2)
                     stack = set()
                     for i in range(d_max):
