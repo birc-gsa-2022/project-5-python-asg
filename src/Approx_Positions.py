@@ -283,11 +283,11 @@ def approx_positions(string, pattern, SA, d):
 # if in ['-', pattern[-1]] (test if new match right)
 ###########################################################
 # Usage:
-string = 'ttgatgaaacgtcgctgctacataggagattcccggcaggcgctatgccttggatgagactaaaggtcacctactccattcctacttccttcagtggagaacgctgcggtccggaagatttgactgagacccgcttaaagttttccgtgcatatttgtagtactaagcgcggctcgatgatgttacacgcttaatccacagttggaggtcatccatgggtgcaccaatgcgtttaagtcagagttaccgatcgttcttaagtgagcttctcggcgaattgtacggaggtgtgctatcactcgttccataagtggcgtactgattatcttcactgacccgcctagacttgtaagcttcgaacagactccgccaatgagagcgtgcaatggtgtacggcattacggagacggtagcgtccaacggaagggccagagtattagattcatttgaaaagaacactgacttttgctaacaaaagctcgggcgtggtaagcggttca'
-pattern = '                                                                                                       tgcgggat'
-pattern = 'tgcgggat'
-SA = SuffixArray(string)
-print(approx_positions(string, pattern, SA, 2)) 
+# string = 'ttgatgaaacgtcgctgctacataggagattcccggcaggcgctatgccttggatgagactaaaggtcacctactccattcctacttccttcagtggagaacgctgcggtccggaagatttgactgagacccgcttaaagttttccgtgcatatttgtagtactaagcgcggctcgatgatgttacacgcttaatccacagttggaggtcatccatgggtgcaccaatgcgtttaagtcagagttaccgatcgttcttaagtgagcttctcggcgaattgtacggaggtgtgctatcactcgttccataagtggcgtactgattatcttcactgacccgcctagacttgtaagcttcgaacagactccgccaatgagagcgtgcaatggtgtacggcattacggagacggtagcgtccaacggaagggccagagtattagattcatttgaaaagaacactgacttttgctaacaaaagctcgggcgtggtaagcggttca'
+# pattern = '                                                                                                       tgcgggat'
+# pattern = 'tgcgggat'
+# SA = SuffixArray(string)
+# print(approx_positions(string, pattern, SA, 2)) 
 
 
 
