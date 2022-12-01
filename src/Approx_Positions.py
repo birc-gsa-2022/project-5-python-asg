@@ -176,7 +176,7 @@ def approx_positions(string, pattern, SA, d):
                             if align1.count('-') + align2.count('-') <= d_max:
                                 approx_pos.add((tup[0], align1, align2))
                         
-                        else: 
+                        else:
                             vertical = matrix[row-1, col]
                             diagonal = matrix[row-1, col-1]
                             horizontal = matrix[row, col-1]
