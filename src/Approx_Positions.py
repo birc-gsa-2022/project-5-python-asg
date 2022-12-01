@@ -67,7 +67,7 @@ def binary_search(SA, string, pattern):
     return SA_positions
 
 
-def local_alignment(seq1, seq2, d):
+def local_matrix(seq1, seq2, d):
 
     def create_matrix(seq1, seq2):
         rows = len(seq1) + 1
@@ -85,7 +85,7 @@ def local_alignment(seq1, seq2, d):
                                        matrix[row - 1, col - 1] + cost)
         return matrix
 
-    def backtrace(seq1, seq2, matrix, d):
+    def check_dist(seq1, seq2, matrix, d):
         row, col = len(seq1), len(seq2)
         # Allowing mismatches:
         last_row = matrix[len(seq1),:]
@@ -102,8 +102,8 @@ def local_alignment(seq1, seq2, d):
             return None
 
     matrix = create_matrix(seq1, seq2)
-    if backtrace(seq1, seq2, matrix, d) != None:
-        edit_distance = backtrace(seq1, seq2, matrix, d)
+    edit_distance = check_dist(seq1, seq2, matrix, d)
+    if edit_distance != None:
         return (edit_distance, matrix)
     else: 
         return None
@@ -150,7 +150,7 @@ def approx_positions(string, pattern, SA, d):
     for tup in possible_intervals:
         seq, d_max = string[tup[0]:tup[1]], d*2
         if 0 <= abs(len(seq) - len(pattern)) <= d_max:
-            alignment = local_alignment(pattern, seq, d_max)
+            alignment = local_matrix(pattern, seq, d_max)
             if alignment != None:
                 if alignment[0] <= d_max:
                     # print('Alignments:', alignment[0], alignment[1])
