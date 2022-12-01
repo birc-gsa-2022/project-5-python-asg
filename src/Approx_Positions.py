@@ -92,17 +92,23 @@ def local_alignment(seq1, seq2, d):
         
         # Allowing mismatches:
         last_row = matrix[len(seq1),:]
-        last_row_min_d_pos = len(last_row)-(d*2)+np.argmin(last_row[-(d*2):])
+        last_row_min_d_pos = len(last_row)-(2*d)+np.argmin(last_row[-(2*d):])
         last_col = matrix[:,len(seq2)]
-        last_col_min_d_pos = len(last_col)-(d*2)+np.argmin(last_col[-(d*2):])
+        last_col_min_d_pos = len(last_col)-(2*d)+np.argmin(last_col[-(2*d):])
         if last_row[last_row_min_d_pos] < matrix[row,col] or last_col[last_col_min_d_pos] < matrix[row,col]:
-            if last_col[last_col_min_d_pos] < last_row[last_row_min_d_pos]:
+            if last_col[last_col_min_d_pos] <= last_row[last_row_min_d_pos]:
                 row, col = last_col_min_d_pos, len(seq2)
             else: row, col = len(seq1), last_row_min_d_pos
         edit_distance = matrix[row,col]
         
+        # print(''.join(seq1), ''.join(seq2))
+        # print(matrix)
+        # row, col = len(seq1), last_row_min_d_pos
+        # edit_distance = matrix[row,col]
         # last_row = matrix[len(seq1),:]
-        # row, col = len(seq1), np.argmin(last_row)
+        # print(last_row_min_d_pos, np.argmin(last_row))
+        # row, col = len(seq1), last_row_min_d_pos
+        # edit_distance = matrix[row,col]
 
         while True:
             cur = matrix[row, col]
@@ -110,16 +116,16 @@ def local_alignment(seq1, seq2, d):
             vertical = matrix[row-1, col]
             diagonal = matrix[row - 1, col - 1]
             horizontal = matrix[row, col - 1]
-            if cur == diagonal + cost:
+            if cur == diagonal + cost: # and diagonal <= d and row>0 and col>0:
                 aligned1 += [seq1[row - 1]]
                 aligned2 += [seq2[col - 1]]
                 row, col = row - 1, col - 1
             else:
-                if cur == vertical + 1:
+                if cur == vertical + 1: # and vertical <= d and row>0:
                     aligned1 += [seq1[row - 1]]
                     aligned2 += ["-"]
                     row, col = row - 1, col
-                elif cur == horizontal + 1:
+                elif cur == horizontal + 1: # and horizontal <= d and col>0:
                     aligned1 += ["-"]
                     aligned2 += [seq2[col - 1]]
                     row, col = row, col - 1
@@ -276,11 +282,11 @@ def approx_positions(string, pattern, SA, d):
 # if in ['-', pattern[-1]] (test if new match right)
 ###########################################################
 # Usage:
-# string = 'ttgatgaaacgtcgctgctacataggagattcccggcaggcgctatgccttggatgagactaaaggtcacctactccattcctacttccttcagtggagaacgctgcggtccggaagatttgactgagacccgcttaaagttttccgtgcatatttgtagtactaagcgcggctcgatgatgttacacgcttaatccacagttggaggtcatccatgggtgcaccaatgcgtttaagtcagagttaccgatcgttcttaagtgagcttctcggcgaattgtacggaggtgtgctatcactcgttccataagtggcgtactgattatcttcactgacccgcctagacttgtaagcttcgaacagactccgccaatgagagcgtgcaatggtgtacggcattacggagacggtagcgtccaacggaagggccagagtattagattcatttgaaaagaacactgacttttgctaacaaaagctcgggcgtggtaagcggttca'
-# pattern = '                                                                                                       tgcgggat'
-# pattern = 'tgcgggat'
-# SA = SuffixArray(string)
-# print(approx_positions(string, pattern, SA, 2)) 
+string = 'ttgatgaaacgtcgctgctacataggagattcccggcaggcgctatgccttggatgagactaaaggtcacctactccattcctacttccttcagtggagaacgctgcggtccggaagatttgactgagacccgcttaaagttttccgtgcatatttgtagtactaagcgcggctcgatgatgttacacgcttaatccacagttggaggtcatccatgggtgcaccaatgcgtttaagtcagagttaccgatcgttcttaagtgagcttctcggcgaattgtacggaggtgtgctatcactcgttccataagtggcgtactgattatcttcactgacccgcctagacttgtaagcttcgaacagactccgccaatgagagcgtgcaatggtgtacggcattacggagacggtagcgtccaacggaagggccagagtattagattcatttgaaaagaacactgacttttgctaacaaaagctcgggcgtggtaagcggttca'
+pattern = '                                                                                                       tgcgggat'
+pattern = 'tgcgggat'
+SA = SuffixArray(string)
+print(approx_positions(string, pattern, SA, 2)) 
 
 
 
