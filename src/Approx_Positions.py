@@ -199,16 +199,16 @@ def approx_positions(string, pattern, SA, d):
                     matrix = alignment[3]  
                     row, col = len(seq1), len(seq2)
                     stack = set()
-                    # for i in range(d_max+1):
-                    #     stack.add(('', '', row-i, col, 0))  # alignment1, alignment2, row, col, mismatches.
-                    #     stack.add(('', '', row, col-i, 0))  # alignment1, alignment2, row, col, mismatches.
-                    last_row = matrix[len(seq1),:]
-                    last_row_min_d_pos = len(last_row)-(2*d)+np.argmin(last_row[-(2*d):])
-                    last_col = matrix[:,len(seq2)]
-                    last_col_min_d_pos = len(last_col)-(2*d)+np.argmin(last_col[-(2*d):])
-                    stack.add(('', '', row, col, 0))
-                    stack.add(('', '', last_col_min_d_pos, col, 0))
-                    stack.add(('', '', row, last_row_min_d_pos, 0))
+                    for i in range(d_max+1):
+                        stack.add(('', '', row-i, col, 0))  # alignment1, alignment2, row, col, mismatches.
+                        stack.add(('', '', row, col-i, 0))  # alignment1, alignment2, row, col, mismatches.
+                    # last_row = matrix[len(seq1),:]
+                    # last_row_min_d_pos = len(last_row)-(2*d)+np.argmin(last_row[-(2*d):])
+                    # last_col = matrix[:,len(seq2)]
+                    # last_col_min_d_pos = len(last_col)-(2*d)+np.argmin(last_col[-(2*d):])
+                    # stack.add(('', '', row, col, 0))
+                    # stack.add(('', '', last_col_min_d_pos, col, 0))
+                    # stack.add(('', '', row, last_row_min_d_pos, 0))
 
                     while len(stack) > 0:
                         cur = stack.pop()
