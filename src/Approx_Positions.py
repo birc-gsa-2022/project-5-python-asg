@@ -209,21 +209,21 @@ def approx_positions(string, pattern, SA, d):
                         diagonal = matrix[row-1, col-1]
                         horizontal = matrix[row, col-1]
                         
-                        if matrix[row,col] == diagonal and diagonal <= d_max:
+                        if matrix[row,col] == diagonal and diagonal <= d_max and row>0 and col>0:
                             path_tup = ( cur[0]+seq1[row-1], cur[1]+seq2[col-1], row-1, col-1 )
                             stack.add(path_tup)
                         if matrix[row,col] == diagonal+1 and diagonal+1 <= d_max and row>0 and col>0:
                             path_tup = ( cur[0]+seq1[row-1], cur[1]+seq2[col-1], row-1, col-1 )
                             stack.add((path_tup))
                         
-                        if matrix[row,col] == vertical and vertical <= d_max:
+                        if matrix[row,col] == vertical and vertical <= d_max and row>0:
                             path_tup = ( cur[0]+seq1[row - 1], cur[1]+"-", row-1, col )
                             stack.add(path_tup)
                         if matrix[row,col] == vertical+1 and vertical+1 <= d_max and row>0:
                             path_tup = ( cur[0]+seq1[row - 1], cur[1]+"-", row-1, col )
                             stack.add(path_tup)
                         
-                        if matrix[row,col] == horizontal and horizontal <= d_max:
+                        if matrix[row,col] == horizontal and horizontal <= d_max and col>0:
                             path_tup = ( cur[0]+"-", cur[1]+seq2[col-1], row, col-1 )
                             stack.add(path_tup)
                         if matrix[row,col] == (horizontal+1) and (horizontal+1) <= d_max and col>0:
@@ -231,8 +231,6 @@ def approx_positions(string, pattern, SA, d):
                             stack.add(path_tup)
 
     for alignment in approx_pos:
-        # print(alignment)
-        
         start_gaps = 0
         j = 0
         while alignment[1][j] == '-':
