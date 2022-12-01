@@ -252,7 +252,7 @@ def approx_positions(string, pattern, SA, d):
         al2 = alignment[2][0+start_gaps:len(alignment[2])-end_gaps]
         pos = alignment[0]+(start_gaps)
         # print(al1,al2)
-        if len(al1) >= (len(pattern)) + al1.count('-'):
+        if len(al1) >= (len(pattern) + al1.count('-')):
             mm = 0
             for i in range(len(al1)):
                 if al1[i] != al2[i]:
