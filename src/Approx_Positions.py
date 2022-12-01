@@ -224,7 +224,7 @@ def approx_positions(string, pattern, SA, d):
                             if matrix[row,col] == diagonal+1 and diagonal+1 < d_max and row>=0 and col>=0:
                                 path_tup = ( cur[0]+seq1[row-1], cur[1]+seq2[col-1], row-1, col-1, cur[4]+1 )
                                 if path_tup[4] < d_max:
-                                    stack.add((path_tup))
+                                    stack.add((path_tup)) 
                             
                             if matrix[row,col] == vertical and vertical < d_max and row>=0:
                                 path_tup = ( cur[0]+seq1[row - 1], cur[1]+"-", row-1, col, cur[4]+1 )
