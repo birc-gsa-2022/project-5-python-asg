@@ -1,4 +1,4 @@
 from distutils.core import setup
 from Cython.Build import cythonize
 
-setup(name='Readmapper_module', ext_modules=cythonize('Readmapper_Cython_Convert.pyx'))
+setup(name='Approx_matching', ext_modules=cythonize('Approx_Positions_Cython.pyx'))

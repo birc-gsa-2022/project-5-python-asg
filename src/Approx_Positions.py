@@ -1,10 +1,41 @@
+############################################################
+# Librarys:
+import re
 import random
 import numpy as np
-from collections import deque
-from approxSEQsimulator import simulate_string
-from approxSEQsimulator import get_approx_read
-from cigar import edits_to_cigar
-from align import get_edits
+
+############################################################
+# Functions:
+
+def edits_to_cigar(edits: str):
+    def split_blocks(x: str):
+        return [m[0] for m in re.findall(r"((.)\2*)", x)]
+    element_list = split_blocks(edits)
+    cigar=''
+    for a in element_list:
+        short = '{}{}'.format(len(a),a[0])
+        cigar+= short
+    return cigar
+
+def get_edits(p: str, q: str):
+    assert len(p) == len(q)
+    edits = ''
+    for i in range(len(p)):
+        if p[i] != '-' and q[i] != '-':
+            edits += 'M'
+        if p[i] == '-' and q[i] != '-':
+            edits += 'I'
+        if p[i] != '-' and q[i] == '-':
+            edits += 'D'
+    if len(p) == 0 and len(q) == 0:
+        p_out = ''
+        q_out = ''
+        edits = ''
+    else:
+        p_out = p.replace('-','')
+        q_out = q.replace('-','')
+        edits = edits
+    return p_out, q_out , edits
 
 def SuffixArray(string):
     if string == '' or string == None:
@@ -122,8 +153,8 @@ def approx_positions(string, pattern, SA, d):
     
     # Generate all possible start positions given d+1 possible exact matching segments:
     exp_starts = set()
-    for k in range(n_segments):
-        segment_start = k*segment_size
+    for s in range(n_segments):
+        segment_start = s*segment_size
         segment_end = segment_start + segment_size
         if segment_end > len(pattern): segment_end = len(pattern)
         matches = binary_search(SA, string, pattern[segment_start:segment_end])
@@ -210,18 +241,12 @@ def approx_positions(string, pattern, SA, d):
                                     stack.append(path_tup)
                         
                         else:
-                            if row == len(seq1) and col in end_col:
+                            if row == len(seq1) and col in end_col or col == len(seq2) and row in end_row:
                                 # align1, align2 = ''.join(cur[0]), ''.join(cur[1])
                                 if cur[0].count('-') <= d and cur[1].count('-') <=d:
                                     if cur[4] <= d_max:
                                         approx_pos.add((tup[0], cur[0], cur[1]))
 
-                            if col == len(seq2) and row in end_row:
-                                # align1, align2 = ''.join(cur[0]), ''.join(cur[1])
-                                if cur[0].count('-') <= d and cur[1].count('-') <=d:
-                                    if cur[4] <= d_max:
-                                        approx_pos.add((tup[0], cur[0], cur[1]))
-    # print(approx_pos)
     for alignment in approx_pos:
         start_gaps = 0
         j = 0
@@ -250,11 +275,10 @@ def approx_positions(string, pattern, SA, d):
                 approx_trimmed.add((pos,cigar))
     return list(approx_trimmed)
 
-
-###########################################################
+############################################################
 # Usage:                                                                'agccaacca'
-# string = 'taatggtgtacgccggggatactcccgtggagtttccacccgcgcttgtgttggatggcccgaagccaaccacggctgtatccaagttatctctgggtaccccggccgttacacatgtagcacaccgcagagagcttggatgacatttgtgtacagaagagtgcttgtacaacacctgtataatagacagtaacggcgtactcgcggatttggtagcttaaccccatacgtcggaaatgatttaacaggtcacgttctggaacacattaacgatggagcgtattctctcccggtatggatgtaatccaagcgatcctacacgcattgatcgatcctcgcgtcgggtagttcaggggttgcgttacgccttatacgtccgaaaggcgaattctaacgggacacccgcacttttataaccaaatagtaaacaccctttaattggctcgaacgacctaaagatatggccctcgtcgtcacatcggctcttaagaggcacatgaggatgaagagcttgatgtagtttcagatcccctacaccacggacaatgtgtgtgagtctcgaagctccggagtgccggtttcgttctgaagccccagaggccccgaagcaacatttaccccctagctcgaaagggtggtaacaagcgctcgaaacctttttatcatgtatcagaagtcgaagctgcctaactcaattcattgaatcagaacacattacggttgtgtcagtgggaaaaatgattggcatttccgggagtcacgcactgtagagtgttgaactgagtgttgaaggatcgcgccgacgtgggagtttgttccatgttgcgctgttagtatcctagcgtagtagattctcgtgactcttagggcccagggcacctcaagccccgtctaacccaaaatcggtacagaaaagggtgggttaaggtcgtggagatagcactcaaatgtaatccttccaaacttcggtgggcagatgcaaaggcctcggcctggaatg'
-# pattern = 'agccaacca'
+# string = 'taatggtgtacgccggggatactcccgtggagtttccacccgcgcttgtgttggatggccc'
+# pattern = 'acccccgtgagt'
 # SA = SuffixArray(string)
 # print(approx_positions(string, pattern, SA, 2)) 
 
