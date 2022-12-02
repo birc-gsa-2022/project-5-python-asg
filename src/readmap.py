@@ -10,8 +10,8 @@ import os
 
 # from Approx_Positions import SuffixArray
 # from Approx_Positions import approx_positions
-from Approx_Positions_Cython import SuffixArray
-from Approx_Positions_Cython import approx_positions
+from ...Approx_Positions_Cython import SuffixArray
+from ...Approx_Positions_Cython import approx_positions
 
 
 def read_fasta(inFile):
