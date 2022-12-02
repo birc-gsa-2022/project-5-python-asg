@@ -103,7 +103,7 @@ def main():
                         read_name = fq_rec[0]
                         read_seq = fq_rec[1]
                         output = [read_name,fa_rec[0],str(match[0]+1),match[1],read_seq]
-                        print('\t'.join(output))
+                        print('\t'.join(output)) 
 
 #########################################
 # Code:
