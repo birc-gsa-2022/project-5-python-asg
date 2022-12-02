@@ -88,11 +88,11 @@ def main():
             ref = fa_rec[1]
             SA = SuffixArray(ref)
             try: 
-                os.makedirs('../{}/{}/'.format(genome_name, fa_rec[0]))
-                with open('../{}/{}/SA.txt'.format(genome_name, fa_rec[0]), 'w') as f:
+                os.makedirs('./{}/{}/'.format(genome_name, fa_rec[0]))
+                with open('./{}/{}/SA.txt'.format(genome_name, fa_rec[0]), 'w') as f:
                     print(SA, file=f)
             except:
-                with open('../{}/{}/SA.txt'.format(genome_name, fa_rec[0]), 'w') as f:
+                with open('./{}/{}/SA.txt'.format(genome_name, fa_rec[0]), 'w') as f:
                     print(SA, file=f)
 
     else:
