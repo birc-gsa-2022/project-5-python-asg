@@ -49,8 +49,8 @@ def read_fastq(inFile):
     return record_list
 
 def write_SA(genome_name, fa_rec, SA):
-    os.makedirs('../{}/{}/'.format(genome_name, fa_rec))
-    with open('../{}/{}/SA.txt'.format(genome_name, fa_rec), 'w') as f:
+    os.makedirs('./{}/{}/'.format(genome_name, fa_rec))
+    with open('./{}/{}/SA.txt'.format(genome_name, fa_rec), 'w') as f:
         print(SA, file=f)
         
 def open_SA(path_to_preprocessed_dir, fa_rec):
@@ -113,8 +113,6 @@ def main():
                         read_seq = fq_rec[1]
                         output = [read_name,fa_rec[0],str(match[0]+1),match[1],read_seq]
                         print('\t'.join(output))
-
-        
 
 #########################################
 # Code:
