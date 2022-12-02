@@ -2,9 +2,9 @@
 # Libraries:
 
 import argparse
+import json
 import sys
 import os
-import pickle
 
 #########################################
 # Functions
@@ -49,11 +49,6 @@ def read_fastq(inFile):
     record_list.append([header.strip(), ''.join(sequence).strip()])
     return record_list
 
-def write_SA(genome_name, fa_rec, SA):
-    os.makedirs('../{}/{}/'.format(genome_name, fa_rec))
-    with open('../{}/{}/SA.txt'.format(genome_name, fa_rec), 'w') as f:
-        print(SA, file=f)
-
 #########################################
 def main():
     argparser = argparse.ArgumentParser(
@@ -83,11 +78,13 @@ def main():
     if args.p:
         #print(f"Preprocess {args.genome}")
         fasta_recs = read_fasta(args.genome)
+        SA_dict = {}
         for fa_rec in fasta_recs:
             ref = fa_rec[1]
             SA = SuffixArray(ref)
-            outputFile = open(str(args.genome.name)+".dat", "wb")
-            pickle.dump(SA, outputFile)
+            SA_dict[fa_rec[0]] = SA
+        json.dump(SA_dict,open("{}.json".format(args.genome.name),"w"))
+            
             
     else:
         if args.reads is None:
