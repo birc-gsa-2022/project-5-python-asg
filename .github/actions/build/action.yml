@@ -14,5 +14,5 @@ runs:
       run: python3 -m pip install -r requirements.txt
       shell: bash
     - name: “Compiling Cyton"
-      run: cd /home/runner/work/project-5-python-asg/project-5-python-asg/src ; python3 setup.py build_ext --inplace
+      run: python3 /home/runner/work/project-5-python-asg/project-5-python-asg/src/setup.py build_ext --inplace
       shell: bash
