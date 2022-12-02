@@ -51,9 +51,15 @@ def read_fastq(inFile):
 def write_SA(genome_name, fa_rec, SA):
     try: path = args.genome.name.split('/')[:-1]
     except: path = ''
-    os.makedirs('./{}/{}/{}/'.format(path, genome_name, fa_rec))
-    with open('./{}/{}/{}/SA.txt'.format(path, genome_name, fa_rec), 'w') as f:
+    try: 
+        os.makedirs('./{}/{}/{}/'.format(path, genome_name, fa_rec))
+        with open('./{}/{}/{}/SA.txt'.format(path, genome_name, fa_rec), 'w') as f:
             print(SA, file=f)
+    except:
+        with open('./{}/{}/{}/SA.txt'.format(path, genome_name, fa_rec), 'w') as f:
+            print(SA, file=f)
+
+    
         
 def open_SA(path_to_preprocessed_dir, fa_rec):
     SA = open('{}/Preprocessed_{}/SA.txt'.format(path_to_preprocessed_dir, fa_rec), 'r').read()
