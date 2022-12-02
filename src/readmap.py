@@ -48,18 +48,6 @@ def read_fastq(inFile):
     record_list.append([header.strip(), ''.join(sequence).strip()])
     return record_list
 
-def write_SA(genome_name, fa_rec, SA):
-    print(args.genome.name, '!!!!!!!!!')
-    try: path = args.genome.name.split('/')[:-1]
-    except: path = ''
-    try: 
-        os.makedirs('./{}/{}/{}/'.format(path, genome_name, fa_rec))
-        with open('./{}/{}/{}/SA.txt'.format(path, genome_name, fa_rec), 'w') as f:
-            print(SA, file=f)
-    except:
-        with open('./{}/{}/{}/SA.txt'.format(path, genome_name, fa_rec), 'w') as f:
-            print(SA, file=f)
-
 #########################################
 def main():
     argparser = argparse.ArgumentParser(
@@ -100,11 +88,11 @@ def main():
             ref = fa_rec[1]
             SA = SuffixArray(ref)
             try: 
-                os.makedirs('./{}/{}.preprocessed/{}/'.format(genome_path, genome_name, fa_rec[0]))
-                with open('./{}/{}.preprocessed/{}/SA.txt'.format(genome_path, genome_name, fa_rec[0]), 'w') as f:
+                os.makedirs('../{}/{}/'.format(genome_name, fa_rec[0]))
+                with open('../{}/{}/SA.txt'.format(genome_name, fa_rec[0]), 'w') as f:
                     print(SA, file=f)
             except:
-                with open('./{}/{}.preprocessed/{}/SA.txt'.format(genome_path, genome_name, fa_rec[0]), 'w') as f:
+                with open('../{}/{}/SA.txt'.format(genome_name, fa_rec[0]), 'w') as f:
                     print(SA, file=f)
 
     else:
