@@ -48,6 +48,11 @@ def read_fastq(inFile):
     record_list.append([header.strip(), ''.join(sequence).strip()])
     return record_list
 
+def write_SA(genome_name, fa_rec, SA):
+    os.makedirs('../{}/{}/'.format(genome_name, fa_rec))
+    with open('../{}/{}/SA.txt'.format(genome_name, fa_rec), 'w') as f:
+        print(SA, file=f)
+
 #########################################
 def main():
     argparser = argparse.ArgumentParser(
@@ -76,24 +81,31 @@ def main():
 
     if args.p:
         #print(f"Preprocess {args.genome}")
-        try: 
-            genome_name = args.genome.name.split('/')[-1]
-            genome_path = args.genome.name.split('/')[:-1][0]
-        except: 
-            genome_name = args.genome.name
-            genome_path = ''
-
         fasta_recs = read_fasta(args.genome)
         for fa_rec in fasta_recs:
             ref = fa_rec[1]
             SA = SuffixArray(ref)
-            try: 
-                os.makedirs('./{}/{}/'.format(genome_name, fa_rec[0]))
-                with open('./{}/{}/SA.txt'.format(genome_name, fa_rec[0]), 'w') as f:
-                    print(SA, file=f)
-            except:
-                with open('./{}/{}/SA.txt'.format(genome_name, fa_rec[0]), 'w') as f:
-                    print(SA, file=f)
+            try: genome_name = args.genome.name.split('/')[1]
+            except: genome_name = args.genome.name
+            write_SA('{}'.format(genome_name),'Preprocessed_{}'.format(fa_rec[0]), SA)
+        # try: 
+        #     genome_name = args.genome.name.split('/')[-1]
+        #     genome_path = args.genome.name.split('/')[:-1][0]
+        # except: 
+        #     genome_name = args.genome.name
+        #     genome_path = ''
+
+        # fasta_recs = read_fasta(args.genome)
+        # for fa_rec in fasta_recs:
+        #     ref = fa_rec[1]
+        #     SA = SuffixArray(ref)
+        #     try: 
+        #         os.makedirs('./{}/{}/{}/'.format(genome_path, genome_name, fa_rec[0]))
+        #         with open('./{}/{}/{}/SA.txt'.format(genome_path, genome_name, fa_rec[0]), 'w') as f:
+        #             print(SA, file=f)
+        #     except:
+        #         with open('./{}/{}/{}/SA.txt'.format(genome_path, genome_name, fa_rec[0]), 'w') as f:
+        #             print(SA, file=f)
 
     else:
         if args.reads is None:
