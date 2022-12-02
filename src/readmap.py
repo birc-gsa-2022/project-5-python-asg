@@ -4,6 +4,7 @@
 import argparse
 import sys
 import os
+import pickle
 
 #########################################
 # Functions
@@ -85,28 +86,9 @@ def main():
         for fa_rec in fasta_recs:
             ref = fa_rec[1]
             SA = SuffixArray(ref)
-            try: genome_name = args.genome.name.split('/')[1]
-            except: genome_name = args.genome.name
-            write_SA('{}'.format(genome_name),'Preprocessed_{}'.format(fa_rec[0]), SA)
-        # try: 
-        #     genome_name = args.genome.name.split('/')[-1]
-        #     genome_path = args.genome.name.split('/')[:-1][0]
-        # except: 
-        #     genome_name = args.genome.name
-        #     genome_path = ''
-
-        # fasta_recs = read_fasta(args.genome)
-        # for fa_rec in fasta_recs:
-        #     ref = fa_rec[1]
-        #     SA = SuffixArray(ref)
-        #     try: 
-        #         os.makedirs('./{}/{}/{}/'.format(genome_path, genome_name, fa_rec[0]))
-        #         with open('./{}/{}/{}/SA.txt'.format(genome_path, genome_name, fa_rec[0]), 'w') as f:
-        #             print(SA, file=f)
-        #     except:
-        #         with open('./{}/{}/{}/SA.txt'.format(genome_path, genome_name, fa_rec[0]), 'w') as f:
-        #             print(SA, file=f)
-
+            outputFile = open(str(args.genome.name)+".dat", "wb")
+            pickle.dump(SA, outputFile)
+            
     else:
         if args.reads is None:
             argparser.print_help()
