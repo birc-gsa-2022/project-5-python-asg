@@ -85,7 +85,6 @@ def main():
             SA_dict[fa_rec[0]] = SA
         json.dump(SA_dict,open("{}.json".format(args.genome.name),"w"))
             
-            
     else:
         if args.reads is None:
             argparser.print_help()
