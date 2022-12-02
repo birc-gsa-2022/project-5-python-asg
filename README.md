@@ -1,4 +1,4 @@
-# Project 5: building your very own readmapper
+# Project 5: building your very own readmapper 
 
 In this final project, you will write a complete read mapper.
 
