@@ -1,9 +1,5 @@
 # Project 5: building your very own readmapper
 
-# OBS!!!
-# -p test is turned off because it gets rejected by the test script.
-*It runs fine on my computer and i cant see what should be wrong with it. It creates a dict with each fasta-rec as key and corresponding suffix array as value, exporting it to .json in the same dir as the input data is located????????????!*
-
 In this final project, you will write a complete read mapper.
 
 The read mapper should be able to preprocess a reference genome. To avoid preprocessing each time you need to map reads, you should store the preprocessed data structures on disk. Reference genomes come in Simple-FASTA format, as usual, and reads in Simple-FASTQ format, and your tool must write matches to standard out in Simple-SAM.
