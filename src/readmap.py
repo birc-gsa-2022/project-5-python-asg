@@ -11,9 +11,6 @@ import os
 
 from Approx_Positions import SuffixArray
 from Approx_Positions import approx_positions
-# from Approx_Positions_Cython import SuffixArray
-# from Approx_Positions_Cython import approx_positions
-
 
 def read_fasta(inFile):
     lines = inFile.readlines()
@@ -83,7 +80,7 @@ def main():
             ref = fa_rec[1]
             SA = SuffixArray(ref)
             SA_dict[fa_rec[0]] = SA
-        json.dump(SA_dict,open("{}.json".format(args.genome.name),"w"))
+        json.dump(SA_dict, open("{}.json".format(args.genome.name),"w"))
             
     else:
         if args.reads is None:

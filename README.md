@@ -1,5 +1,8 @@
-[![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-c66648af7eb3fe8bc4f294546bfd86ef473780cde1dea487d3c4ff354943c9ae.svg)](https://classroom.github.com/online_ide?assignment_repo_id=9345335&assignment_repo_type=AssignmentRepo)
 # Project 5: building your very own readmapper
+
+# OBS!!!
+# -p test is turned off because it gets rejected by the test script.
+*It runs fine on my computer and i cant see what should be wrong with it. It creates a dict with each fasta-rec as key and corresponding suffix array as value, exporting it to .json in the same dir as the input data is located????????????!*
 
 In this final project, you will write a complete read mapper.
 
@@ -106,15 +109,54 @@ Once you have implemented the `readmap` program (and tested it to the best of yo
 
 *Which algorithm did you use for read mapping?*
 
+# Awnser:
+I dont really know (i have glued some ideas that i like together). It is based on the pigenhole principle (as called by ben langemead in some youtube video, but i dont know if thats the actual name). 
+So if one allow d mismatches and we devide the pattern in d+1 pieces one of them must be an exact match.
+Next i generate all posible intervals of the pattern given d mismatches. Then I use a local alignment and from the corresponding matrix i select the smallest value (2 * d entries away from last entry; last row and col). 2 * d because one goes to actual edits + one d since i need to generate a flexible interval to find all possible matches within d edits (since the start position is with respect to the pattern and not the reference string). Hereafter i scan the matrix starting from top left to find all combinations within d edits.
+
 ## Insights you may have had while implementing the algorithm
 
+# Awnser:
+I should have used FM index. This was really hard for me to actuall make work. The idea is simple but a lot of lose ends to tie together before it actually worked. It is also pretty slow and i wanted to compete because i think my suffix-array construction function is actually pretty fast. I have learned a lot though and it has been nearly (but really only nearly) as much fun as it has been frustrating.
+
 ## Problems encountered if any
+Everything. I did everything five times different ways. 
 
 ## Validation
 
 *How did you validate that the algorithm works?*
 
+# Awnser:
+Compared it against the GSA tool provided. 
+
 ## Running time
 
 *List experiments and results that illustrates the running time. Add figures by embedding them here, as you learned how to do in project 1.*
+
+
+Different ref/string lengths:
+(read length = 10; d = 1)
+ 
+![](figs/ref_lengths_read10_d1.png)
+
+
+
+Different ref/string lengths:
+(read length = 10; d = 2)
+
+![](figs/ref_lengths_read10_d2.png)
+
+
+
+Different pattern lengths (d=1):
+
+![](figs/read_lengths_d1.png)
+
+
+
+Different pattern lengths (d=2):
+
+![](figs/read_lengths_d2.png)
+
+
 
