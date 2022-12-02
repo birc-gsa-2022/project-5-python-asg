@@ -10,10 +10,7 @@ import os
 
 from Approx_Positions import SuffixArray
 from Approx_Positions import approx_positions
-# from Readmapper_Cython_Convert import SuffixArray
-# from Readmapper_Cython_Convert import approx_search
-from cigar import edits_to_cigar
-from align import get_edits
+
 
 def read_fasta(inFile):
     lines = inFile.readlines()
@@ -70,9 +67,6 @@ def main():
         help="preprocess the genome."
     )
     argparser.add_argument(
-        "-u", help="Path to dir containing preprocessed genome",
-    )
-    argparser.add_argument(
         "-d", type=int, metavar="integer",
         default=1, help="max edit distance."
     )
@@ -97,24 +91,6 @@ def main():
             try: genome_name = args.genome.name.split('/')[-1]
             except: genome_name = args.genome.name
             write_SA('{}'.format(genome_name),'Preprocessed_{}'.format(fa_rec[0]), SA)
-    
-    elif args.u:
-        #print(f"Use preprocessed genome {args.u}")
-        fasta_recs = read_fasta(args.genome)
-        fastq_recs = read_fastq(args.reads)
-        for fa_rec in fasta_recs:
-            ref = fa_rec[1]
-            SA = open_SA(args.u, fa_rec[0])
-            for fq_rec in fastq_recs:
-                read = fq_rec[1]
-                matches = approx_positions(ref, read, SA, args.d)
-                for match in matches:
-                    read_name = fq_rec[0]
-                    read_seq = fq_rec[1]
-                    edits = get_edits(match[2], match[1])
-                    cigar = edits_to_cigar(edits[2])
-                    output = [read_name,fa_rec[0],str(match[0]+1),cigar,read_seq]
-                    print('\t'.join(output))
 
     else:
         if args.reads is None:
@@ -133,9 +109,7 @@ def main():
                     for match in matches:
                         read_name = fq_rec[0]
                         read_seq = fq_rec[1]
-                        edits = get_edits(match[2], match[1])
-                        cigar = edits_to_cigar(edits[2])
-                        output = [read_name,fa_rec[0],str(match[0]+1),cigar,read_seq]
+                        output = [read_name,fa_rec[0],str(match[0]+1),match[1],read_seq]
                         print('\t'.join(output))
 
         

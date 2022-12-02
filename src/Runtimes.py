@@ -11,42 +11,34 @@
 # # functions:
 
 # from Approx_Positions import SuffixArray
-# from Approx_Positions import approx_search
-# from SEQsimulator import simulate_string
-# from SEQsimulator import get_exact_read
-# from naive import naive_algorithm
+# from Approx_Positions import approx_positions
+# from approxSEQsimulator import simulate_string
+# from approxSEQsimulator import get_approx_read
 
 # # Usage:
-# string  = 'aaaaaaaaaaaaaaa'
-# pattern = 'ba'
-# SA = SuffixArray(string)
-# print(approx_search(string, pattern, SA, 2))
+# # string  = 'aaaaaaaaaaaaaaa'
+# # pattern = 'ababaa'
+# # SA = SuffixArray(string)
+# # print(approx_positions(string, pattern, SA, 2))
 
-# ##############################################################
-# tests:
+# # ##############################################################
+# # tests:
  
-# 1mio test SA:
-# string = simulate_string(1000000)
+# # 1mio test SA:
+# string = simulate_string(100000)
 # start_time = time.time()
 # SuffixArray(string)
 # end_time = time.time()
 # print(end_time-start_time)
 
 
-# Test suffixtree-algorithm vs naive-algorithm for same result:
-# for i in range(50000):
+# # Test suffixtree-algorithm vs naive-algorithm for same result:
+# for i in range(500):
 #     print('Iteration nr: ', i+1)
-#     ref = simulate_string(random.randint(40,100))
-#     read = get_exact_read(ref, random.randint(0,30))
+#     ref = simulate_string(random.randint(2000,10000))
+#     read = get_approx_read(ref, random.randint(100,300), 0)
 #     SA = SuffixArray(ref)
-#     offsets = approx_search(ref, read, SA, 0)
-#     if sorted(offsets) != sorted(naive_algorithm(ref,read)):
-#         print('Algorithm mistake!')
-#         print(ref)
-#         print(read)
-#         print(sorted(offsets))
-#         print(sorted(naive_algorithm(ref,read)))
-#         break
+#     offsets = approx_positions(ref, read, SA, 1)
 #     if i+1 == 50000:
 #         print('DONE')
 

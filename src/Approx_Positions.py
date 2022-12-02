@@ -1,5 +1,10 @@
+import random
 import numpy as np
 from collections import deque
+from approxSEQsimulator import simulate_string
+from approxSEQsimulator import get_approx_read
+from cigar import edits_to_cigar
+from align import get_edits
 
 def SuffixArray(string):
     if string == '' or string == None:
@@ -150,62 +155,73 @@ def approx_positions(string, pattern, SA, d):
             matrix_inf = local_matrix(pattern, seq, d_max)
             if matrix_inf != None:
                 if matrix_inf[0] <= d_max:
-                    # print('Matrix_and_pos: \n', alignment[1], tup[0])
+                    # print('Matrix_and_pos: \n', matrix_inf[1], tup[0])
+                    
                     seq1, seq2 = list(pattern), list(seq)
                     matrix = matrix_inf[1]  
-                    row, col = len(seq1), len(seq2)
-                    stack = set()
-                    for i in range(d_max):
-                        stack.add(('', '', row-i, col, 0))  # alignment1, alignment2, row, col, mismatches.
-                        stack.add(('', '', row, col-i, 0))  # alignment1, alignment2, row, col, mismatches.
+                    stack = [('', '', 0, 0, 0)]
+                    end_row = list(range(len(seq2)+1))[-d_max:]
+                    end_col = list(range(len(seq1)+1))[-d_max:]
+
                     while len(stack) > 0:
                         cur = stack.pop()
                         row, col = cur[2], cur[3]
-                        if row == 0 and col == 0:
-                            align1, align2 = ''.join(cur[0])[::-1], ''.join(cur[1])[::-1]
-                            if align1.count('-') <= d and align2.count('-') <=d:
-                                if cur[4] <= d_max:
-                                    approx_pos.add((tup[0], align1, align2))
+
+                        # print(cur)
+                        if row < len(seq1) and col < len(seq2):
+            
+                            diagonal = matrix[row+1, col+1]
+                            vertical = matrix[row+1, col]
+                            horizontal = matrix[row, col+1]
+                            
+                            if matrix[row,col] == diagonal and diagonal <= d_max and row+1<=len(seq1) and col+1<=len(seq2):
+                                path_tup = ( cur[0]+seq1[row], cur[1]+seq2[col], row+1, col+1, cur[4] )
+                                if path_tup[4] <= d_max:
+                                    stack.append(path_tup)
+                            if matrix[row,col] == diagonal-1 and diagonal+1 <= d_max and row+1<=len(seq1) and col+1<=len(seq2):
+                                path_tup = ( cur[0]+seq1[row], cur[1]+seq2[col], row+1, col+1, cur[4]+1 )
+                                if path_tup[4] <= d_max:
+                                    stack.append(path_tup) 
+                            
+                            if matrix[row,col] == vertical and vertical <= d_max and row+1<=len(seq1):
+                                path_tup = ( cur[0]+seq1[row], cur[1]+"-", row+1, col, cur[4]+1 )
+                                if path_tup[4] <= d_max:
+                                    stack.append(path_tup)
+                            if matrix[row,col] == vertical+1 and vertical+1 <= d_max and row+1<=len(seq1):
+                                path_tup = ( cur[0]+seq1[row], cur[1]+"-", row+1, col, cur[4]+1 )
+                                if path_tup[4] <= d_max:
+                                    stack.append(path_tup)
+                            if matrix[row,col] == vertical-1 and vertical-1 <= d_max and row+1<=len(seq1):
+                                path_tup = ( cur[0]+seq1[row], cur[1]+"-", row+1, col, cur[4]+1 )
+                                if path_tup[4] <= d_max:
+                                    stack.append(path_tup)
+                            
+                            if matrix[row,col] == horizontal and horizontal <= d_max and col+1<=len(seq2):
+                                path_tup = ( cur[0]+"-", cur[1]+seq2[col], row, col+1, cur[4]+1 )
+                                if path_tup[4] <= d_max:
+                                    stack.append(path_tup)
+                            if matrix[row,col] == (horizontal+1) and (horizontal+1) <= d_max and col+1<=len(seq2):
+                                path_tup = ( cur[0]+"-", cur[1]+seq2[col], row, col+1, cur[4]+1 )
+                                if path_tup[4] <= d_max:
+                                    stack.append(path_tup)
+                            if matrix[row,col] == (horizontal-1) and (horizontal-1) <= d_max and col+1<=len(seq2):
+                                path_tup = ( cur[0]+"-", cur[1]+seq2[col], row, col+1, cur[4]+1 )
+                                if path_tup[4] <= d_max:
+                                    stack.append(path_tup)
                         
                         else:
-                            vertical = matrix[row-1, col]
-                            diagonal = matrix[row-1, col-1]
-                            horizontal = matrix[row, col-1]
-                            
-                            if matrix[row,col] == diagonal and diagonal <= d_max and row>0 and col>0:
-                                path_tup = ( cur[0]+seq1[row-1], cur[1]+seq2[col-1], row-1, col-1, cur[4] )
-                                if path_tup[4] < d_max:
-                                    stack.add(path_tup)
-                            if matrix[row,col] == diagonal+1 and diagonal+1 <= d_max and row>0 and col>0:
-                                path_tup = ( cur[0]+seq1[row-1], cur[1]+seq2[col-1], row-1, col-1, cur[4]+1 )
-                                if path_tup[4] < d_max:
-                                    stack.add((path_tup)) 
-                            
-                            if matrix[row,col] == vertical and vertical <= d_max and row>0:
-                                path_tup = ( cur[0]+seq1[row - 1], cur[1]+"-", row-1, col, cur[4]+1 )
-                                if path_tup[4] <= d_max:
-                                    stack.add(path_tup)
-                            if matrix[row,col] == vertical+1 and vertical+1 <= d_max and row>0:
-                                path_tup = ( cur[0]+seq1[row - 1], cur[1]+"-", row-1, col, cur[4]+1 )
-                                if path_tup[4] <= d_max:
-                                    stack.add(path_tup)
-                            if matrix[row,col] == vertical-1 and vertical-1 <= d_max and row>0:
-                                path_tup = ( cur[0]+seq1[row - 1], cur[1]+"-", row-1, col, cur[4]+1 )
-                                if path_tup[4] <= d_max:
-                                    stack.add(path_tup)
-                            
-                            if matrix[row,col] == horizontal and horizontal <= d_max and col>0:
-                                path_tup = ( cur[0]+"-", cur[1]+seq2[col-1], row, col-1, cur[4]+1 )
-                                if path_tup[4] <= d_max:
-                                    stack.add(path_tup)
-                            if matrix[row,col] == (horizontal+1) and (horizontal+1) <= d_max and col>0:
-                                path_tup = ( cur[0]+"-", cur[1]+seq2[col-1], row, col-1, cur[4]+1 )
-                                if path_tup[4] <= d_max:
-                                    stack.add(path_tup)
-                            if matrix[row,col] == (horizontal-1) and (horizontal-1) <= d_max and col>0:
-                                path_tup = ( cur[0]+"-", cur[1]+seq2[col-1], row, col-1, cur[4]+1 )
-                                if path_tup[4] <= d_max:
-                                    stack.add(path_tup)
+                            if row == len(seq1) and col in end_col:
+                                # align1, align2 = ''.join(cur[0]), ''.join(cur[1])
+                                if cur[0].count('-') <= d and cur[1].count('-') <=d:
+                                    if cur[4] <= d_max:
+                                        approx_pos.add((tup[0], cur[0], cur[1]))
+
+                            if col == len(seq2) and row in end_row:
+                                # align1, align2 = ''.join(cur[0]), ''.join(cur[1])
+                                if cur[0].count('-') <= d and cur[1].count('-') <=d:
+                                    if cur[4] <= d_max:
+                                        approx_pos.add((tup[0], cur[0], cur[1]))
+    # print(approx_pos)
     for alignment in approx_pos:
         start_gaps = 0
         j = 0
@@ -227,21 +243,18 @@ def approx_positions(string, pattern, SA, d):
                     mm+=1
                 if mm > d: break
             if mm <= d:
-                al1 = alignment[1][0+start_gaps:len(alignment[1])-end_gaps]
-                al2 = alignment[2][0+start_gaps:len(alignment[2])-end_gaps]
-                approx_trimmed.add((pos,al1,al2))
+                al1 = ''.join(alignment[1][0+start_gaps:len(alignment[1])-end_gaps])
+                al2 = ''.join(alignment[2][0+start_gaps:len(alignment[2])-end_gaps])
+                edits = get_edits(al2,al1)
+                cigar = edits_to_cigar(edits[2])
+                approx_trimmed.add((pos,cigar))
     return list(approx_trimmed)
 
 
 ###########################################################
-# Usage:                                                                                                 a-cccccgtga'
-# string = 'cgcttaccgttcttaaggctattgcgaaacaggctatgattttgaccctgaccgttcagtcgtcaaaatctcgattctagtacgtgggatttctagacgtcaacccccgtgaccgattctgaaaggaattctaggggaatagtcgacttagcgacactggttgaccggggagcacacgatcggacttcccgagacccagatcgaagagcgtctcgtccacgtgccggagacaatagcggggatgaccgggtcgtgcccttctggccgtaactcgaattgtcgaggtggctagcgtccgttccagaagtacttaagtcgataatgagctgggacctagattttcaagcgaacagatgtacacctttcgtggtcgtactaaggcttcgtgtaagtagttggggactgttcacactaatagcatcggaattcttcatgaatcaatcgtatcgattgactacctgcacattgattcactcgtctgaggacgtgcgttaccagataagccgagagtacccgatctatcagaatggatacccctcacagggatctattagtagttacacgggtggtgccaccccagagcgccaacttcttacttgacacgttgggtacgacagaaagttcaacgcgattttccggattagacagttccgtgttaccgctcagacacatcccgcatcccaagttacaaacacgtccaaattgaacctagcgatctccgcggaacatacagttttttgagaaataagtacgtttctcacggccgttgctaactcccgattgaccacctgcgacgttaaaaatcttacagtgcgacactggatcaccaaatggccggtgacatacgcccatacgaataagatcacgggcacttttgccactaggattcaaattccacgtagttcttacaaggaacaacaacaaagataaacttgtacagttgatgcgagcaactgattctacaaaaatccgcatgccagagatgaatttgtaccctatt'
-# pattern = 'acccccgtga'
+# Usage:                                                                'agccaacca'
+# string = 'taatggtgtacgccggggatactcccgtggagtttccacccgcgcttgtgttggatggcccgaagccaaccacggctgtatccaagttatctctgggtaccccggccgttacacatgtagcacaccgcagagagcttggatgacatttgtgtacagaagagtgcttgtacaacacctgtataatagacagtaacggcgtactcgcggatttggtagcttaaccccatacgtcggaaatgatttaacaggtcacgttctggaacacattaacgatggagcgtattctctcccggtatggatgtaatccaagcgatcctacacgcattgatcgatcctcgcgtcgggtagttcaggggttgcgttacgccttatacgtccgaaaggcgaattctaacgggacacccgcacttttataaccaaatagtaaacaccctttaattggctcgaacgacctaaagatatggccctcgtcgtcacatcggctcttaagaggcacatgaggatgaagagcttgatgtagtttcagatcccctacaccacggacaatgtgtgtgagtctcgaagctccggagtgccggtttcgttctgaagccccagaggccccgaagcaacatttaccccctagctcgaaagggtggtaacaagcgctcgaaacctttttatcatgtatcagaagtcgaagctgcctaactcaattcattgaatcagaacacattacggttgtgtcagtgggaaaaatgattggcatttccgggagtcacgcactgtagagtgttgaactgagtgttgaaggatcgcgccgacgtgggagtttgttccatgttgcgctgttagtatcctagcgtagtagattctcgtgactcttagggcccagggcacctcaagccccgtctaacccaaaatcggtacagaaaagggtgggttaaggtcgtggagatagcactcaaatgtaatccttccaaacttcggtgggcagatgcaaaggcctcggcctggaatg'
+# pattern = 'agccaacca'
 # SA = SuffixArray(string)
 # print(approx_positions(string, pattern, SA, 2)) 
-
-
-
-
-
 
